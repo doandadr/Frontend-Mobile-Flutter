@@ -22,12 +22,12 @@ class EventDetailController extends GetxController {
 
 
   bool canRegister(EventDetail event) {
-    DateTime? startRegistration = Utils.toDateTimeFlexible(
-      event.pendaftaran?.mulai,
-    );
-    DateTime? endRegistration = Utils.toDateTimeFlexible(
-      event.pendaftaran?.selesai,
-    );
+    // DateTime? startRegistration = Utils.toDateTimeFlexible(
+    //   event.pendaftaran?.mulai,
+    // );
+    // DateTime? endRegistration = Utils.toDateTimeFlexible(
+    //   event.pendaftaran?.selesai,
+    // );
     DateTime? startEvent = Utils.toDateTimeFlexible(event.acara?.mulai);
 
     if (startEvent == null) {

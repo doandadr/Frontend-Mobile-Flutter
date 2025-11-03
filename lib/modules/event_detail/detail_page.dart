@@ -62,7 +62,7 @@ class DetailPage extends GetView<EventDetailController> {
                   description: event.deskripsi,
                   primaryColor: AppColors.primary,
                   registerButtonText:
-                      controller.isUserLoggedIn.value? (controller.canRegister(event)?  "Daftar Acara" : "Batal Daftar")  : "Login Untuk Mendaftar",
+                      controller.isUserLoggedIn.value? (controller.canRegister(event)?  "Daftar Acara" : "Pendaftaran Ditutup")  : "Login Untuk Mendaftar",
                       // controller.eventDetail.value?.statusAcara != "Akan Datang"
                       // ? 'Pendaftaran Ditutup'
                       // : (controller.isUserLoggedIn.value

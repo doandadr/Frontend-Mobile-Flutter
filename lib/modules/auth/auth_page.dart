@@ -33,6 +33,8 @@ class AuthPage extends GetView<AuthController> {
       final name = data.additionalSignupData?['name'];
       final telp = data.additionalSignupData?['telp'];
       final username = data.additionalSignupData?['username'];
+      final statusKaryawan = data.termsOfService[0].accepted;
+
 
       if (name == null || telp == null || username == null || data.name == null || data.password == null) {
         return 'Nama lengkap, nomor telepon, dan nama pengguna harus diisi';
@@ -46,7 +48,7 @@ class AuthPage extends GetView<AuthController> {
           telp: telp,
           password: data.password!,
           confirmPassword: data.password!,
-          statusKaryawan: 0,
+          statusKaryawan: statusKaryawan? 1 : 0,
         );
 
         if (error != null) {
@@ -166,6 +168,15 @@ class AuthPage extends GetView<AuthController> {
                               return null;
                             },
                           ),
+
+
+                        ],
+                        termsOfService: [
+                          TermOfService(
+                            id: "karyawan",
+                            mandatory: false,
+                            text: "Karyawan",
+                          )
                         ],
 
                         messages: LoginMessages(

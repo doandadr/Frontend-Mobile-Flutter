@@ -11,6 +11,8 @@ class User extends Equatable {
   final String email;
   final String telp;
   final String role;
+  @JsonKey(name: "status_karyawan")
+  final String statusKaryawan;
   @JsonKey(name: "email_verified_at")
   final String? emailVerifiedAt;
 
@@ -21,6 +23,7 @@ class User extends Equatable {
     required this.email,
     required this.telp,
     required this.role,
+    required this.statusKaryawan,
     this.emailVerifiedAt,
   });
 
@@ -37,6 +40,7 @@ class User extends Equatable {
     email,
     telp,
     role,
+    statusKaryawan,
     emailVerifiedAt,
   ];
 }

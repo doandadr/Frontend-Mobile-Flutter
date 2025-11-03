@@ -41,6 +41,7 @@ class AuthService extends GetxService {
         storage.write("username", model.data!.user.username);
         storage.write("role", model.data!.user.role);
         storage.write("email", model.data!.user.email);
+        storage.write("status_karyawan", model.data!.user.statusKaryawan);
       }
 
       return model;
