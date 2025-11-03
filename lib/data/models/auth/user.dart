@@ -12,7 +12,7 @@ class User extends Equatable {
   final String telp;
   final String role;
   @JsonKey(name: "status_karyawan")
-  final String statusKaryawan;
+  final int statusKaryawan;
   @JsonKey(name: "email_verified_at")
   final String? emailVerifiedAt;
 

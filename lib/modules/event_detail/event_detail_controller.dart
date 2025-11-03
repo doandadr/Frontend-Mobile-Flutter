@@ -15,13 +15,13 @@ class EventDetailController extends GetxController {
 
   final isLoading = false.obs;
   final errorMessage = ''.obs;
-  final eventDetail = Rxn<EventDetail>();
+  final eventDetail = Rxn<Event>();
   final isRegistered = false.obs;
   final isUserLoggedIn = false.obs;
   DateTime dateTimeNow = DateTime.now();
 
 
-  bool canRegister(EventDetail event) {
+  bool canRegister(Event event) {
     // DateTime? startRegistration = Utils.toDateTimeFlexible(
     //   event.pendaftaran?.mulai,
     // );
@@ -65,7 +65,7 @@ class EventDetailController extends GetxController {
       isUserLoggedIn.value = storage.hasData('access_token');
 
       final detail = await eventService.getEventDetail(id);
-      eventDetail.value = detail;
+      eventDetail.value = detail?.data?.event;
 
       if (isUserLoggedIn.value) {
         isRegistered.value = await daftarService.isRegistered(id);

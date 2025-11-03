@@ -13,7 +13,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
   email: json['email'] as String,
   telp: json['telp'] as String,
   role: json['role'] as String,
-  statusKaryawan: json['status_karyawan'] as String,
+  statusKaryawan: (json['status_karyawan'] as num).toInt(),
   emailVerifiedAt: json['email_verified_at'] as String?,
 );
 
