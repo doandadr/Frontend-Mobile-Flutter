@@ -126,9 +126,12 @@ class DetailPage extends GetView<EventDetailController> {
                         iconColor: AppColors.primary,
                         title: 'Susunan Acara',
                         trailing: IconButton(
-                          onPressed: () => data.modulAcara?.mdlFileRundownUrl != null
-                ? Get.snackbar('Susunan Acara', data.modulAcara!.mdlFileRundownUrl!)
-                    : null,
+                          onPressed:(){
+                                    if (data.modulAcara?.mdlFileRundownUrl != null){
+                                      Get.snackbar('Susunan Acara', data.modulAcara!.mdlFileRundownUrl!);
+                                      Utils.openUrl(data.modulAcara!.mdlFileRundownUrl!);
+                                    }
+                          },
                           icon: const Icon(Icons.download_rounded),
                           color: AppColors.primary,
                         ),
@@ -142,9 +145,12 @@ class DetailPage extends GetView<EventDetailController> {
                         iconColor: AppColors.primary,
                         title: 'Modul Acara',
                         trailing: IconButton(
-                          onPressed: () => data.modulAcara?.mdlFileAcaraUrl != null
-                              ? Get.snackbar('Susunan Acara', data.modulAcara!.mdlFileAcaraUrl!)
-                              : null,
+                          onPressed:(){
+                            if (data.modulAcara?.mdlFileAcaraUrl != null){
+                              Get.snackbar('Modul Acara', data.modulAcara!.mdlFileAcaraUrl!);
+                              Utils.openUrl(data.modulAcara!.mdlFileAcaraUrl!);
+                            }
+                          },
                           icon: const Icon(Icons.download_rounded),
                           color: AppColors.primary,
                         ),
