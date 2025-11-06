@@ -1,84 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Impor paket google_fonts
 import 'app_colors.dart';
 
 class TextStyles {
+
   // Header Styles
-  static const TextStyle headerLarge = TextStyle(
+  static final TextStyle headerLarge = GoogleFonts.poppins(
     fontSize: 36,
     fontWeight: FontWeight.bold,
     color: AppColors.textWhite,
     height: 1.1,
   );
-  
-  static const TextStyle headerMedium = TextStyle(
+
+  static final TextStyle headerMedium = GoogleFonts.poppins(
     fontSize: 24,
     fontWeight: FontWeight.bold,
     color: AppColors.textPrimary,
     height: 1.2,
   );
-  
-  static const TextStyle headerSmall = TextStyle(
+
+  static final TextStyle headerSmall = GoogleFonts.poppins(
     fontSize: 18,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
-  
+
   // Body Styles
-  static const TextStyle bodyLarge = TextStyle(
+  static final TextStyle bodyLarge = GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.normal,
     color: AppColors.textPrimary,
     height: 1.5,
   );
-  
-  static const TextStyle bodyMedium = TextStyle(
+
+  static final TextStyle bodyMedium = GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.normal,
     color: AppColors.textPrimary,
     height: 1.4,
   );
-  
-  static const TextStyle bodySmall = TextStyle(
+
+  static final TextStyle bodySmall = GoogleFonts.poppins(
     fontSize: 13,
     fontWeight: FontWeight.normal,
     color: AppColors.textWhite,
     height: 1.4,
   );
-  
+
   // Label Styles
-  static const TextStyle labelMedium = TextStyle(
+  static final TextStyle labelMedium = GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
   );
-  
-  static const TextStyle labelSmall = TextStyle(
+
+  static final TextStyle labelSmall = GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
   );
-  
+
   // Button Styles
-  static const TextStyle button = TextStyle(
+  static final TextStyle button = GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: AppColors.textWhite,
   );
-  
-  static const TextStyle buttonSmall = TextStyle(
+
+  static final TextStyle buttonSmall = GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     color: AppColors.primary,
   );
-  
+
   // Logo Styles
-  static const TextStyle logo = TextStyle(
+  static final TextStyle logo = GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     color: AppColors.primary,
   );
-  
-  // Helper method untuk menambahkan shadow pada text
+
+  // Helper method untuk menambahkan shadow pada text.
   static TextStyle withShadow(TextStyle style, {double opacity = 0.3}) {
     return style.copyWith(
       shadows: [

@@ -39,10 +39,10 @@ class DetailPage extends GetView<EventDetailController> {
         if (controller.hasData) {
           final event = controller.eventDetail.value!;
 
-          final DateTime registrationStartDate = event.pendaftaran.mulaiRaw;
-          final DateTime registrationEndDate = event.pendaftaran.selesaiRaw;
-          final DateTime eventStartDate =event.acara.mulaiRaw;
-          final DateTime eventEndDate =event.acara.selesaiRaw ?? eventStartDate.add(const Duration(days: 1));
+          final DateTime registrationStartDate = event.pendaftaranMulai;
+          final DateTime registrationEndDate = event.pendaftaranSelesai;
+          final DateTime eventStartDate =event.acaraMulai;
+          final DateTime eventEndDate =event.acaraSelesai ?? eventStartDate.add(const Duration(days: 1));
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -53,8 +53,8 @@ class DetailPage extends GetView<EventDetailController> {
                   title: event.nama,
                   location: event.lokasi ?? 'N/A',
                   dateTimeText:
-                  '${event.acara.mulai ?? ''} - ${event.acara.selesai ?? ''}',
-                  imageUrl: event.banner,
+                  '${event.acaraMulai ?? ''} - ${event.acaraSelesai ?? ''}',
+                  imageUrl: event.bannerAcara,
                   borderColor: AppColors.primary,
                 ),
                 const SizedBox(height: 20),
@@ -178,16 +178,16 @@ class DetailPage extends GetView<EventDetailController> {
                     InfoItem(
                       label: 'Pendaftaran',
                       value:
-                      '${event.pendaftaran.mulai ?? ''} - ${event.pendaftaran.selesai ?? ''}',
+                      '${event.pendaftaranMulai ?? ''} - ${event.pendaftaranSelesai ?? ''}',
                     ),
                     InfoItem(
                       label: 'Jam Acara',
                       value:
-                      '${event.acara.mulai ?? ''} - ${event.acara.selesai ?? ''}',
+                      '${event.acaraMulai } - ${event.acaraSelesai}',
                     ),
                     InfoItem(
                       label: 'Tanggal Acara',
-                      value: event.acara.mulai,
+                      value: event.acaraMulai.toString(),
                     ),
                   ],
                 ),

@@ -74,8 +74,8 @@ class ActivityContainer extends StatelessWidget {
                         child: Text(
                           eventName,
                           style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
                             color: darkBlue,
                           ),
                           softWrap: true,
@@ -91,8 +91,8 @@ class ActivityContainer extends StatelessWidget {
                         eventDate,
                         textAlign: TextAlign.right,
                         style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
                           color: darkBlue,
                         ),
                       ),

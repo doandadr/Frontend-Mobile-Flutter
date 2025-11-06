@@ -31,7 +31,7 @@ class EventDetailController extends GetxController {
       isUserLoggedIn.value = storage.hasData('access_token');
 
       final detail = await eventService.getEventDetail(id);
-      eventDetail.value = detail?.data.event;
+      eventDetail.value = detail?.data;
 
       if (isUserLoggedIn.value) {
         isRegistered.value = await daftarService.isRegistered(id);
@@ -52,7 +52,11 @@ class EventDetailController extends GetxController {
 
     if (result.success) {
       isRegistered.value = true;
+      Get.snackbar('Berhasil', 'Anda berhasil mendaftar acara.');
       return null;
+    } else {
+      Get.snackbar('Gagal', result.message);
+      return result.message;
     }
 
     return result.message;

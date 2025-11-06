@@ -282,39 +282,39 @@ class _AuthPageState extends State<AuthPage> {
 
                   const SizedBox(height: 20),
 
-                  // View Ingat saya
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: Checkbox(
-                              value: _rememberMe,
-                              onChanged: (value) {
-                                setState(() {
-                                  _rememberMe = value ?? false;
-                                });
-                              },
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            "Ingat saya",
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  // // View Ingat saya
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  //     Row(
+                  //       children: [
+                  //         SizedBox(
+                  //           height: 20,
+                  //           width: 20,
+                  //           child: Checkbox(
+                  //             value: _rememberMe,
+                  //             onChanged: (value) {
+                  //               setState(() {
+                  //                 _rememberMe = value ?? false;
+                  //               });
+                  //             },
+                  //             shape: RoundedRectangleBorder(
+                  //               borderRadius: BorderRadius.circular(4),
+                  //             ),
+                  //           ),
+                  //         ),
+                  //         const SizedBox(width: 8),
+                  //         Text(
+                  //           "Ingat saya",
+                  //           style: TextStyle(
+                  //             fontSize: 13,
+                  //             color: Colors.black87,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ],
+                  // ),
 
                   const SizedBox(height: 50),
 

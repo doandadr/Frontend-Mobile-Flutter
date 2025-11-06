@@ -25,15 +25,24 @@ class HomePage extends GetView<HomeController> {
               onChanged: (value) => controller.searchQuery.value = value,
               decoration: InputDecoration(
                 hintText: "Cari nama, deskripsi, atau lokasi acara",
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Colors.grey[500],
                 ),
                 filled: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 0,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: const BorderSide(color: Color(0xFFBDBDBD), width: 1.5),
                 ),
               ),
             ),

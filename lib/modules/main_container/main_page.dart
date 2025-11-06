@@ -4,6 +4,7 @@ import 'package:frontend_mobile_flutter/modules/auth/auth_page.dart';
 import 'package:frontend_mobile_flutter/modules/main_container/main_controller.dart';
 import 'package:frontend_mobile_flutter/modules/participant/activity/activity_page.dart';
 import 'package:frontend_mobile_flutter/modules/event_detail/detail_page.dart';
+import 'package:frontend_mobile_flutter/modules/participant/activity/scan/scan_page.dart';
 import 'package:frontend_mobile_flutter/modules/participant/home/home_page.dart';
 import 'package:frontend_mobile_flutter/modules/participant/profile/profile_page.dart';
 import 'package:get/get.dart';
@@ -16,6 +17,7 @@ class MainView extends GetView<MainController> {
   List<Widget> _screens() => const [
     HomePage(),
     ActivityPage(),
+    ScanPage(),
     ProfilePage(),
   ];
 
@@ -29,10 +31,13 @@ class MainView extends GetView<MainController> {
       title: 'Acara',
     ),
     PersistentBottomNavBarItem(
+      icon: const Icon(Icons.qr_code_scanner),
+      title: 'Presensi',
+    ),
+    PersistentBottomNavBarItem(
       icon: const Icon(Icons.person),
       title: 'Profile',
     ),
-
   ];
 
   @override

@@ -12,11 +12,27 @@ class TSearchBar extends StatelessWidget {
 
     return TextFormField(
       onChanged: controller.updateSearchQuery,
-      decoration: const InputDecoration(
-        hintText: 'Cari acaramu...',
-        prefixIcon: Icon(Icons.search),
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+      decoration: InputDecoration(
+        hintText: 'Aktivitas...',
+        prefixIcon: Icon(
+          Icons.search,
+          color: Colors.grey[500],
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(color: Color(0xFFBDBDBD), width: 1.5),
+        ),
       ),
     );
   }

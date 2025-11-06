@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Impor paket google_fonts
 import 'app_colors.dart';
 import 'text_styles.dart';
 
 class AppThemes {
   static ThemeData get lightTheme {
     return ThemeData(
+      // Mengatur Poppins sebagai font default untuk seluruh aplikasi.
+      fontFamily: GoogleFonts.poppins().fontFamily,
+
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: ColorScheme.light(
