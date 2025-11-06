@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:equatable/src/equatable.dart';
+import 'package:frontend_mobile_flutter/data/models/basic_response.dart';
 import 'package:get/get.dart';
 
 import '../../models/pendaftaran/my_registration.dart';
@@ -9,6 +11,18 @@ import '../endpoints.dart';
 class PendaftaranService extends GetxService {
   final Dio _dio = ApiClient.dio;
 
+  Future<BasicResponse> batalDaftar(int eventId) async {
+    try {
+      final resp = await _dio.delete("${Endpoints.events}/$eventId/batal-daftar");
+      return BasicResponse.fromJson(resp.data);
+    } on DioException catch (e) {
+      return BasicResponse(
+        success: false,
+        message: e.response?.data["message"] ?? "Gagal membatalkan acara",
+      );
+    }
+  }
+
   Future<PendaftaranResponse?> daftarEvent(int eventId) async {
     try {
       final resp = await _dio.post("${Endpoints.events}/$eventId/daftar");
@@ -16,7 +30,7 @@ class PendaftaranService extends GetxService {
     } on DioException catch (e) {
       return PendaftaranResponse(
         success: false,
-        message: e.response?.data["message"] ?? "Failed to register",
+        message: e.response?.data["message"] ?? "Gagal mendaftar acara",
       );
     }
   }

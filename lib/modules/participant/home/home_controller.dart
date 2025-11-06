@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/utils.dart';
 import '../../../data/models/event/event.dart';
 
-enum HomeFilter { none, /*active,*/ upcoming, past }
+enum HomeFilter { none, active, upcoming, past }
 
 class HomeController extends GetxController {
   final service = Get.find<HomeService>();
@@ -14,10 +14,10 @@ class HomeController extends GetxController {
   // Cached lists in controller (backed by service cache too)
   final allEvents = <Event>[].obs;
 
-  // final activeEvents = <Event>[].obs;
+  final activeEvents = <Event>[].obs;
   final upcomingEvents = <Event>[].obs;
   final pastEvents = <Event>[].obs;
-  DateTime dateTimeNow = DateTime.now();
+  // DateTime dateTimeNow = DateTime.now();
 
   // current active chip index: null (none) => show all
   final Rxn<HomeFilter> activeFilter = Rxn<HomeFilter>(null);
@@ -29,41 +29,41 @@ class HomeController extends GetxController {
     _loadAll();
   }
 
-  bool canRegister(Event event) {
-    DateTime? startRegistration = Utils.toDateTimeFlexible(
-      event.pendaftaranMulai,
-    );
-    DateTime? endRegistration = Utils.toDateTimeFlexible(
-      event.pendaftaranSelesai,
-    );
-    DateTime? startEvent = Utils.toDateTimeFlexible(event.acaraMulai);
-
-    if (startEvent == null) {
-      return false;
-    }
-
-    return ["public", "private"].contains(event.kategori) &&
-        event.status == "active" &&
-        startEvent.isAfter(dateTimeNow);
-    /*
-        && (startRegistration.isAfter(dateTimeNow))
-        && (endRegistration.isBefore(dateTimeNow));
-*/
-  }
+//   bool canRegister(Event event) {
+//     DateTime? startRegistration = Utils.toDateTimeFlexible(
+//       event.pendaftaranMulai,
+//     );
+//     DateTime? endRegistration = Utils.toDateTimeFlexible(
+//       event.pendaftaranSelesai,
+//     );
+//     DateTime? startEvent = Utils.toDateTimeFlexible(event.acaraMulai);
+//
+//     if (startEvent == null) {
+//       return false;
+//     }
+//
+//     return ["public", "private"].contains(event.kategori) &&
+//         event.status == "active" &&
+//         startEvent.isAfter(dateTimeNow);
+//     /*
+//         && (startRegistration.isAfter(dateTimeNow))
+//         && (endRegistration.isBefore(dateTimeNow));
+// */
+//   }
 
   Future<void> _loadAll() async {
     try {
       isLoading.value = true;
 
       final a = await service.fetchAllEvents();
-      // final b = await service.fetchActiveEvents();
-      // final c = await service.fetchUpcomingEvents();
-      // final d = await service.fetchPastEvents();
+      final b = await service.fetchActiveEvents();
+      final c = await service.fetchUpcomingEvents();
+      final d = await service.fetchPastEvents();
 
       allEvents.assignAll(a);
-      // upcomingEvents.addAll(b.where((e) => e.));
-      upcomingEvents.assignAll(a.where((e) => canRegister(e)));
-      pastEvents.assignAll(a.where((e) => !canRegister(e)));
+      activeEvents.assignAll(b);
+      upcomingEvents.assignAll(c);
+      pastEvents.assignAll(d);
     } catch (e) {
       Get.snackbar(
         "Error loading data",
@@ -91,8 +91,8 @@ class HomeController extends GetxController {
       events = allEvents;
     } else {
       switch (f) {
-        // case HomeFilter.active:
-        //   return activeEvents;
+        case HomeFilter.active:
+          return activeEvents;
         case HomeFilter.upcoming:
           events = upcomingEvents;
           break;
@@ -118,4 +118,19 @@ class HomeController extends GetxController {
           .toList();
     }
   }
+
+  Future<void> refreshEvents() async {
+    _loadAll();
+  }
+
+  HomeFilter getFilter(Event event) {
+    if (activeEvents.contains(event)) {
+      return HomeFilter.active;
+    } else if (upcomingEvents.contains(event)) {
+      return HomeFilter.upcoming;
+    } else {
+      return HomeFilter.past;
+    }
+  }
+
 }

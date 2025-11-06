@@ -87,6 +87,10 @@ class ActivityController extends GetxController {
   }
 
   Future<void> loadFollowed({int page = 1}) async {
+    if (!isLoggedIn.value) {
+      followedEvents.clear();
+      return;
+    }
     try {
       isLoading.value = true;
       error.value = null;

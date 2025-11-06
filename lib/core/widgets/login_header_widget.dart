@@ -216,7 +216,7 @@ class LoginHeaderWidget extends StatelessWidget {
               size: screenWidth * 0.07,
             ),
           if (logoText != null && logoIcon != null)
-            SizedBox(height: screenWidth * 0.01),
+            SizedBox(height: screenWidth * 0.005),
           if (logoText != null)
             Text(
               logoText!,

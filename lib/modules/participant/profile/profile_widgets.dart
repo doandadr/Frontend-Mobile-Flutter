@@ -32,16 +32,14 @@ class ProfileInfoTile extends StatelessWidget {
             color: Colors.grey[100],
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Center(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+          child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child:Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
             ),
-          ),
+          ),),
         ),
       ],
     );
@@ -148,8 +146,8 @@ class EditProfileDialog extends GetView<ProfileController> {
                 const SizedBox(height: 16),
                 _EditField(
                     label: 'No. Whatsapp', hint: 'No. Whatsapp baru...', controller: controller.whatsappController),
-                const SizedBox(height: 16),
-                _EditField(label: 'Email', hint: 'Email baru...', controller: controller.emailController),
+                // const SizedBox(height: 16),
+                // _EditField(label: 'Email', hint: 'Email baru...', controller: controller.emailController),
                 const SizedBox(height: 24),
                 // Tombol untuk menyimpan semua perubahan.
                 ElevatedButton(

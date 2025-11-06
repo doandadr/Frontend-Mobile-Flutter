@@ -40,11 +40,12 @@ class ProfileService extends GetxService {
         Endpoints.profileUpdate,
         data: form,
       );
-
+      print('success update profile: ${res.data}');
       return ProfileResponse.fromJson(res.data);
 
     } on DioException catch (e) {
       final data = e.response?.data;
+      print('error update profile: $data');
       return ProfileResponse(
         success: false,
         message: data?["message"] ?? "Update failed",

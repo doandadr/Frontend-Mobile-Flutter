@@ -106,45 +106,49 @@ class ActivityContainer extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Status:',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF7A869A),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-
-                    // chip status
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: statusBg,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Text(
-                        statusMap(status),
-                        style: TextStyle(
-                          color: statusText,
-                          fontWeight: FontWeight.w700,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Status:',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF7A869A),
+                          ),
                         ),
-                      ),
-                    ),
+                        const SizedBox(width: 8),
 
-                    const SizedBox(width: 12),
+                        // chip status
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: statusBg,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Text(
+                            statusMap(status),
+                            style: TextStyle(
+                              color: statusText,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
 
-                    // bulatan hijau/abu
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: dotColor,
-                      ),
+                        // bulatan hijau/abu
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: dotColor,
+                          ),
+                        ),
+                      ],
                     ),
 
                     // tombol kanan
+                    (status == ActivityFilter.mendatang)? SizedBox.shrink() :
                    TextButton.icon(
                         onPressed: onActionTap,
                         icon: Icon(

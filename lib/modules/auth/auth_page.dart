@@ -1,308 +1,982 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_login/flutter_login.dart';
+import 'package:get/get.dart';
 import 'package:frontend_mobile_flutter/modules/auth/auth_controller.dart';
 import 'package:frontend_mobile_flutter/modules/auth/otp_verification_page.dart';
+import 'package:frontend_mobile_flutter/modules/auth/forget_password_page.dart';
 import 'package:frontend_mobile_flutter/modules/participant/home/widgets/fail_register.dart';
 import 'package:frontend_mobile_flutter/modules/participant/home/widgets/success_register.dart';
-import 'package:get/get.dart';
 import '../../core/widgets/login_header_widget.dart';
 import '../../core/app_colors.dart';
 import '../../core/text_styles.dart';
 
-class AuthPage extends GetView<AuthController> {
-  const AuthPage({super.key});
+class AuthPage extends StatefulWidget {
+  const AuthPage({Key? key}) : super(key: key);
+
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage> {
+  final AuthController controller = Get.find<AuthController>();
+
+  bool isLogin = true;
+  bool isLoading = false;
+  bool _rememberMe = false;
+  bool _obscurePasswordLogin = true;
+  bool _obscurePasswordReg = true;
+  bool _obscureConfirmPassword = true;
+
+  // Login Controllers
+  final TextEditingController _emailLogin = TextEditingController();
+  final TextEditingController _passwordLogin = TextEditingController();
+
+  // Register Controllers
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _username = TextEditingController();
+  final TextEditingController _emailReg = TextEditingController();
+  final TextEditingController _telp = TextEditingController();
+  final TextEditingController _passwordReg = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
+  final _loginFormKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
+
+  int _statusKaryawan = 1; // 1 = Karyawan, 0 = Non Karyawan
+
+  Future<void> _onLogin() async {
+    if (!_loginFormKey.currentState!.validate()) return;
+
+    // if (_emailLogin.text.isEmpty || _passwordLogin.text.isEmpty) {
+    //   Get.snackbar("Error", "Email dan password wajib diisi",
+    //       backgroundColor: Colors.redAccent, colorText: Colors.white);
+    //   return;
+    // }
+
+    setState(() => isLoading = true);
+    final result =
+        await controller.login(_emailLogin.text.trim(), _passwordLogin.text);
+    setState(() => isLoading = false);
+
+    if (result != null) {
+      Get.snackbar("Login Gagal", result,
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+    } else {
+      Get.snackbar("Berhasil", "Login sukses!",
+          backgroundColor: Colors.green, colorText: Colors.white);
+      Get.offAllNamed('/main');
+    }
+  }
+
+  Future<void> _onRegister() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+    final result = await controller.register(
+      name: _name.text.trim(),
+      username: _username.text.trim(),
+      email: _emailReg.text.trim(),
+      telp: _telp.text.trim(),
+      password: _passwordReg.text,
+      confirmPassword: _confirmPassword.text,
+      statusKaryawan: _statusKaryawan,
+    );
+    setState(() => isLoading = false);
+
+    if (result != null) {
+      Get.to(() => const FailRegister());
+    } else {
+      Get.to(() => OtpVerificationPage(email: _emailReg.text.trim()));
+      Get.snackbar("Registrasi Berhasil",
+          "Silakan verifikasi email kamu sebelum login.",
+          backgroundColor: Colors.green, colorText: Colors.white);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final headerHeight = screenHeight * 0.10;
-
-    Future<String?> _onLogin(LoginData data) async {
-      final result = await controller.login(data.name, data.password);
-
-      if (result == null) {
-        Get.offAllNamed('/main');
-        SuccessRegister.show(context, title: 'LOGIN SUCCESS', subtitle: 'Selamat Datang Kembali!');
-      } else {
-        FailRegister.show(context, title: 'LOGIN FAILED', subtitle: result);
-      }
-      return result;
-    }
-
-    Future<String?> _onSignup(SignupData data) async {
-      final name = data.additionalSignupData?['name'];
-      final telp = data.additionalSignupData?['telp'];
-      final username = data.additionalSignupData?['username'];
-      final statusKaryawan = data.termsOfService[0].accepted;
-
-
-      if (name == null || telp == null || username == null || data.name == null || data.password == null) {
-        return 'Nama lengkap, nomor telepon, dan nama pengguna harus diisi';
-      }
-
-      try {
-        final error = await controller.register(
-          name: name,
-          username: username,
-          email: data.name!,
-          telp: telp,
-          password: data.password!,
-          confirmPassword: data.password!,
-          statusKaryawan: statusKaryawan? 1 : 0,
-        );
-
-        if (error != null) {
-          return error;
+    return WillPopScope(
+      onWillPop: () async {
+        if (!isLogin) {
+          setState(() => isLogin = true);
+          return false;
         }
-
-        SuccessRegister.show(
-          context,
-          title: 'REGISTER SUCCESS',
-          subtitle: 'Akun berhasil dibuat, silahkan cek email untuk verifikasi',
-        );
-
-        Get.to(
-              () => OtpVerificationPage(
-            email: data.name ?? '',
-            isFromRegistration: true,
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            child: isLogin ? _buildLoginView() : _buildRegisterView(),
           ),
-          transition: Transition.rightToLeft,
-          duration: Duration(milliseconds: 300),
-        );
-        return null;
-      } catch (e) {
-        FailRegister.show(
-          context,
-          title: 'REGISTER FAILED',
-          subtitle: e.toString(),
-        );
-      }
-    }
+        ),
+      ),
+    );
+  }
 
-    Future<String?> _onRecoverPassword(String email) async {
-      Get.to(
-        () => OtpVerificationPage(email: email),
-        transition: Transition.rightToLeft,
-        duration: Duration(milliseconds: 300),
-      );
-
-      // Return null to prevent flutter_login from showing success message
-      // The OTP page will handle the rest of the flow
-      return null;
-    }
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
+  // Login View
+  Widget _buildLoginView() {
+    return SingleChildScrollView(
+      child: Column(
         children: [
-          Container(color: AppColors.background),
-
-          Positioned(
-            top: headerHeight,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: PrimaryScrollController(
-              controller: ScrollController(),
-              child: Builder(
-                builder: (context) {
-                  return ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context).copyWith(
-                      scrollbars: false,
-                      overscroll: false,
-                      physics: const NeverScrollableScrollPhysics(),
-                    ),
-                    child: Container(
-                      color: AppColors.background,
-                      child: FlutterLogin(
-                        onLogin: _onLogin,
-                        onSignup: _onSignup,
-                        onRecoverPassword: _onRecoverPassword,
-
-                        additionalSignupFields: [
-                          // Field 1: Nama Lengkap
-                          UserFormField(
-                            keyName: 'name',
-                            displayName: 'Nama Lengkap',
-                            icon: Icon(Icons.person_outline),
-                            fieldValidator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Nama lengkap tidak boleh kosong';
-                              }
-                              if (value.length < 3) {
-                                return 'Nama minimal 3 karakter';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          // Field 2: Nomor Telepon
-                          UserFormField(
-                            keyName: 'telp',
-                            displayName: 'Nomor Telepon',
-                            icon: Icon(Icons.phone_outlined),
-                            fieldValidator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Nomor telepon tidak boleh kosong';
-                              }
-                              // Validasi hanya angka
-                              if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                                return 'Nomor telepon hanya boleh angka';
-                              }
-                              if (value.length < 10 || value.length > 13) {
-                                return 'Nomor telepon 10-13 digit';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          // Field 3: Nama User
-                          UserFormField(
-                            keyName: 'username',
-                            displayName: 'Nama Pengguna',
-                            icon: Icon(Icons.credit_card),
-                            fieldValidator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Nama pengguna tidak boleh kosong';
-                              }
-                              return null;
-                            },
-                          ),
-
-
-                        ],
-                        termsOfService: [
-                          TermOfService(
-                            id: "karyawan",
-                            mandatory: false,
-                            text: "Karyawan",
-                          )
-                        ],
-
-                        messages: LoginMessages(
-                          userHint: 'Email',
-                          passwordHint: 'Enter your password',
-                          confirmPasswordHint: 'Konfirmasi password',
-                          loginButton: 'Login',
-                          signupButton: 'Register',
-                          forgotPasswordButton: 'lupa kata sandi',
-                          recoverPasswordButton: 'RESET',
-                          goBackButton: 'KEMBALI',
-                          confirmPasswordError: 'Password tidak cocok!',
-                          recoverPasswordDescription:
-                              'Masukkan email Anda untuk menerima kode verifikasi',
-                          recoverPasswordSuccess:
-                              'Kode verifikasi telah dikirim ke email Anda',
-                        ),
-
-                        theme: LoginTheme(
-                          primaryColor: AppColors.primary,
-                          accentColor: AppColors.background,
-                          errorColor: AppColors.error,
-                          pageColorLight: AppColors.background,
-                          pageColorDark: AppColors.background,
-
-                          cardTheme: CardTheme(
-                            color: AppColors.background,
-                            elevation: 0,
-                            margin: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero,
-                            ),
-                          ),
-
-                          inputTheme: InputDecorationTheme(
-                            filled: true,
-                            fillColor: AppColors.inputFill,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: AppColors.inputFocus,
-                                width: 2,
-                              ),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: AppColors.error,
-                                width: 1,
-                              ),
-                            ),
-                            prefixIconColor: AppColors.textSecondary,
-                            suffixIconColor: AppColors.textSecondary,
-                          ),
-
-                          buttonTheme: LoginButtonTheme(
-                            backgroundColor: AppColors.primary,
-                            splashColor: AppColors.primaryDark,
-                            highlightColor: AppColors.primaryLight,
-                            elevation: 0,
-                            highlightElevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-
-                          titleStyle: TextStyles.headerMedium.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                          bodyStyle: TextStyles.bodyMedium,
-                          textFieldStyle: TextStyles.bodyMedium,
-                          buttonStyle: TextStyles.button,
-
-                          beforeHeroFontSize: 20,
-                          afterHeroFontSize: 20,
-                        ),
-
-                        userValidator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Masukkan email atau username';
-                          }
-                          return null;
-                        },
-
-                        passwordValidator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Masukkan password';
-                          }
-                          if (value.length < 8) {
-                            return 'Password minimal 8 karakter';
-                          }
-                          return null;
-                        },
-
-                        scrollable: false,
-                        hideForgotPasswordButton: true, // TODO implement flow forgot password
-                        hideProvidersTitle: true,
+          const LoginHeaderWidget(
+            imagePath: 'assets/images/building_header.png',
+            logoImagePath: 'assets/logo.png',
+            logoText: 'AirNav Indonesia',
+            useImageLogo: true, 
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _loginFormKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header "Masuk"
+                  Center(
+                    child: Text(
+                      "Masuk",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
-                  );
-                },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Email/Username
+                  TextFormField( 
+                    controller: _emailLogin,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      hintText: "Email",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      prefixIcon: Icon(Icons.email_outlined),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 1.5,
+                        ),
+                      ),
+                      // Error border
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.5,
+                        ),
+                      ),
+
+                      labelStyle: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        color: Color(0xFF1565C0),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    ),
+                    // Validator
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return "Email tidak boleh kosong";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 26),
+
+                  // Password
+                  TextFormField( 
+                    controller: _passwordLogin,
+                    obscureText: _obscurePasswordLogin,
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      hintText: "Enter your password",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      prefixIcon: Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePasswordLogin
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: Colors.grey[600],
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePasswordLogin = !_obscurePasswordLogin;
+                          });
+                        },
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 1.5,
+                        ),
+                      ),
+                      //Error border
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.5,
+                        ),
+                      ),
+                      labelStyle: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        color: Color(0xFF1565C0),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    ),
+                    // Tambah Validator
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return "Password tidak boleh kosong";
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // View Ingat saya
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: Checkbox(
+                              value: _rememberMe,
+                              onChanged: (value) {
+                                setState(() {
+                                  _rememberMe = value ?? false;
+                                });
+                              },
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Ingat saya",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 50),
+
+                  // Button Masuk
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isLoading ? null : _onLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF1565C0),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              "Masuk",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Footer Links
+                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => setState(() => isLogin = false),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Belum punya akun? ",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            "Daftar",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF1565C0),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => const ForgetPasswordPage());
+                      },
+                      child: Text(
+                        "lupa kata sandi",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF1565C0),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                ],
               ),
             ),
           ),
-
-          // Header - Fixed di atas
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: LoginHeaderWidget(
-              imagePath: 'assets/images/building_header.png',
-              useImageLogo: true,
-              logoImagePath: 'assets/images/logo.png',
-              logoText: 'AirNav Indonesia',
-            ),
-          ),
         ],
+      ),
+    );
+  }
+
+  // View Register
+  Widget _buildRegisterView() {
+    return SingleChildScrollView(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Text(
+                      "Buat Akun Baru",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Nama Lengkap
+                  TextFormField(
+                    controller: _name,
+                    decoration: InputDecoration(
+                      labelText: "Nama Lengkap",
+                      hintText: "Nama Lengkap",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      prefixIcon: Icon(Icons.person_outline),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 1.5,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.5,
+                        ),
+                      ),
+                      labelStyle: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        color: Color(0xFF1565C0),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    ),
+                    validator: (v) =>
+                        v!.isEmpty ? "Nama tidak boleh kosong" : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Username
+                  TextFormField(
+                    controller: _username,
+                    decoration: InputDecoration(
+                      labelText: "Username",
+                      hintText: "Username",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      prefixIcon: Icon(Icons.account_circle_outlined),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 1.5,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.5,
+                        ),
+                      ),
+                      labelStyle: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        color: Color(0xFF1565C0),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    ),
+                    validator: (v) =>
+                        v!.isEmpty ? "Username tidak boleh kosong" : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Nomor Telepon
+                  TextFormField(
+                    controller: _telp,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: "Nomor Telepon",
+                      hintText: "Nomor Telepon",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      prefixIcon: Icon(Icons.phone_outlined),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 1.5,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.5,
+                        ),
+                      ),
+                      labelStyle: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        color: Color(0xFF1565C0),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    ),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return "Nomor telepon tidak boleh kosong";
+                      }
+
+                      final phoneRegex = RegExp(r'^(?:\+62|0)[0-9]{9,}$');
+                      if (!phoneRegex.hasMatch(v)) {
+                        return "Format nomor tidak valid (contoh: 0812xxx atau +62812xxx)";
+                      }
+
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Email
+                  TextFormField(
+                    controller: _emailReg,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      hintText: "Email",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      prefixIcon: Icon(Icons.email_outlined),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 1.5,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.5,
+                        ),
+                      ),
+                      labelStyle: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        color: Color(0xFF1565C0),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    ),
+                    validator: (v) =>
+                        v!.isEmpty ? "Email tidak boleh kosong" : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Password
+                  TextFormField(
+                    controller: _passwordReg,
+                    obscureText: _obscurePasswordReg,
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      hintText: "Password",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      prefixIcon: Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePasswordReg
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: Colors.grey[600],
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePasswordReg = !_obscurePasswordReg;
+                          });
+                        },
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 1.5,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.5,
+                        ),
+                      ),
+                      labelStyle: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        color: Color(0xFF1565C0),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    ),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return "Password tidak boleh kosong";
+                      }
+
+                      final pwdRegex = RegExp(
+                          r'^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}$');
+                      if (!pwdRegex.hasMatch(v)) {
+                        return "Minimal 8 karakter, harus ada 1 uppercase, 1 simbol, dan 1 angka";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Konfirmasi Password
+                  TextFormField(
+                    controller: _confirmPassword,
+                    obscureText: _obscureConfirmPassword,
+                    decoration: InputDecoration(
+                      labelText: "Konfirmasi Password",
+                      hintText: "Konfirmasi Password",
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      prefixIcon: Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: Colors.grey[600],
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF1565C0),
+                          width: 1.5,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.5,
+                        ),
+                      ),
+                      labelStyle: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        color: Color(0xFF1565C0),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    ),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return "Password tidak boleh kosong";
+                      }
+
+                      final pwdRegex = RegExp(
+                          r'^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}$');
+                      if (!pwdRegex.hasMatch(v)) {
+                        return "Minimal 8 karakter, harus ada 1 uppercase, 1 simbol, dan 1 angka";
+                      }
+
+                      if (v != _passwordReg.text) {
+                        return "Password tidak sama";
+                      }
+
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Password hint
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Text(
+                      "Minimal 8 karakter, 1 angka, 1 kapital, 1 simbol",
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Status
+                  Row(
+                    children: [
+                      Text(
+                        "Status ",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        "*",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Radio<int>(
+                              value: 1,
+                              groupValue: _statusKaryawan,
+                              onChanged: (value) {
+                                setState(() {
+                                  _statusKaryawan = value!;
+                                });
+                              },
+                              activeColor: Color(0xFF1565C0),
+                            ),
+                            Text(
+                              "Karyawan",
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Radio<int>(
+                              value: 0,
+                              groupValue: _statusKaryawan,
+                              onChanged: (value) {
+                                setState(() {
+                                  _statusKaryawan = value!;
+                                });
+                              },
+                              activeColor: Color(0xFF1565C0),
+                            ),
+                            Text(
+                              "Non Karyawan",
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Button Daftar
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isLoading ? null : _onRegister,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF1565C0),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              "Daftar",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Footer Link
+                  Center(
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          "Sudah punya akun?",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => setState(() => isLogin = true),
+                          child: Text(
+                            "Masuk di sini",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF1565C0),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

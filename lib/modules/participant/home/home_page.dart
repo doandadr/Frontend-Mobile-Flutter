@@ -57,20 +57,21 @@ class HomePage extends GetView<HomeController> {
                       },
                     ),
                     const SizedBox(width: 8),
-                    // ChoiceChip.elevated(
-                    //   elevation: 1,
-                    //   backgroundColor: const Color(0xFFEBFAFF),
-                    //   selectedColor: Colors.blue[200],
-                    //   label: const Text('Berlangsung'),
-                    //   selected: active == HomeFilter.active,
-                    //   onSelected: (_) =>
-                    //       controller.toggleFilter(HomeFilter.active),
-                    // ),
                     ChoiceChip.elevated(
                       elevation: 1,
                       backgroundColor: const Color(0xFFEBFAFF),
                       selectedColor: Colors.blue[200],
-                      label: const Text('Bisa Daftar'),
+                      label: const Text('Berlangsung'),
+                      selected: active == HomeFilter.active,
+                      onSelected: (_) =>
+                          controller.toggleFilter(HomeFilter.active),
+                    ),
+                    const SizedBox(width: 8),
+                    ChoiceChip.elevated(
+                      elevation: 1,
+                      backgroundColor: const Color(0xFFEBFAFF),
+                      selectedColor: Colors.blue[200],
+                      label: const Text('Akan Datang'),
                       selected: active == HomeFilter.upcoming,
                       onSelected: (_) =>
                           controller.toggleFilter(HomeFilter.upcoming),
@@ -80,7 +81,7 @@ class HomePage extends GetView<HomeController> {
                       elevation: 1,
                       backgroundColor: const Color(0xFFEBFAFF),
                       selectedColor: Colors.blue[200],
-                      label: const Text('Ditutup'),
+                      label: const Text('Selesai'),
                       selected: active == HomeFilter.past,
                       onSelected: (_) =>
                           controller.toggleFilter(HomeFilter.past),
@@ -104,14 +105,17 @@ class HomePage extends GetView<HomeController> {
                     child: Text('Belum Ada Acara'),
                   );
                 }
-                return ListView.separated(
-                  itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
+                return RefreshIndicator(
+                  onRefresh: controller.refreshEvents,
+                  child: ListView.separated(
+                    itemCount: list.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
 
-                    final Event e = list[index];
-                    return _EventListTile(event: e, bisaDaftar: controller.canRegister(e));
-                  },
+                      final Event e = list[index];
+                      return _EventListTile(event: e, filterCategory: controller.getFilter(e),);
+                    },
+                  ),
                 );
 
               }),
@@ -125,9 +129,9 @@ class HomePage extends GetView<HomeController> {
 
 class _EventListTile extends StatelessWidget {
   final Event event;
-  final bool bisaDaftar;
+  final HomeFilter filterCategory;
 
-  const _EventListTile({required this.event,required this.bisaDaftar});
+  const _EventListTile({required this.event,required this.filterCategory});
 
   @override
   Widget build(BuildContext context) {
@@ -137,15 +141,26 @@ class _EventListTile extends StatelessWidget {
     final lokasi = event.lokasi;
 
     Color statusColor;
+    String filterText;
 
-    switch (bisaDaftar) {
-      case true:
-        statusColor = Colors.green.shade200;
+    switch (filterCategory) {
+      case HomeFilter.active:
+        statusColor = Colors.orange.shade100;
+        filterText = "Berlangsung";
         break;
-      case false:
-        statusColor = Colors.red.shade200;
+      case HomeFilter.upcoming:
+        statusColor = Colors.green.shade100;
+        filterText = "Akan Datang";
         break;
-      }
+      case HomeFilter.past:
+        statusColor = Colors.red.shade100;
+        filterText = "Sudah Selesai";
+        break;
+      case HomeFilter.none:
+        filterText = "Segera Hadir";
+        statusColor = Colors.grey.shade100;
+        break;
+    }
 
 
     return Card(
@@ -222,7 +237,7 @@ class _EventListTile extends StatelessWidget {
                           ),
                           _buildEventInfo(
                             Icons.circle,
-                            bisaDaftar? "Bisa Daftar" : "Ditutup",
+                            filterText,
                             backgroundColor: statusColor,
                             iconSize: 10,
                             textColor: Colors.black87,

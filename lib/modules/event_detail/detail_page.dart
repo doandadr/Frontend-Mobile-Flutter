@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_mobile_flutter/core/app_colors.dart';
 import 'package:frontend_mobile_flutter/modules/event_detail/event_detail_controller.dart';
+import 'package:frontend_mobile_flutter/modules/participant/home/widgets/fail_register.dart';
 import 'package:frontend_mobile_flutter/modules/participant/home/widgets/register_event_popup.dart';
+import 'package:frontend_mobile_flutter/modules/participant/home/widgets/success_register.dart';
 import 'package:get/get.dart';
 import 'package:frontend_mobile_flutter/modules/participant/activity/widgets/app_bar.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../../core/utils.dart';
 import '../../data/models/event/followed_event.dart';
@@ -21,7 +22,7 @@ class DetailPage extends GetView<EventDetailController> {
   Widget build(BuildContext context) {
     final args = Get.arguments as Map;
     final eventId = args["id"];
-    final data = args["data"];
+    final data = args["data"]; // Keep for existing logic if needed
     controller.loadEventDetail(eventId);
 
     return Scaffold(
@@ -37,6 +38,12 @@ class DetailPage extends GetView<EventDetailController> {
 
         if (controller.hasData) {
           final event = controller.eventDetail.value!;
+
+          final DateTime registrationStartDate = event.pendaftaran.mulaiRaw;
+          final DateTime registrationEndDate = event.pendaftaran.selesaiRaw;
+          final DateTime eventStartDate =event.acara.mulaiRaw;
+          final DateTime eventEndDate =event.acara.selesaiRaw ?? eventStartDate.add(const Duration(days: 1));
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -46,7 +53,7 @@ class DetailPage extends GetView<EventDetailController> {
                   title: event.nama,
                   location: event.lokasi ?? 'N/A',
                   dateTimeText:
-                      '${event.acara?.mulai ?? ''} - ${event.acara?.selesai ?? ''}',
+                  '${event.acara.mulai ?? ''} - ${event.acara.selesai ?? ''}',
                   imageUrl: event.banner,
                   borderColor: AppColors.primary,
                 ),
@@ -58,106 +65,112 @@ class DetailPage extends GetView<EventDetailController> {
                       children: const [TextSpan(text: 'Tentang Acara')],
                     ),
                   ),
-                  isRegistered: controller.isRegistered.value,
                   description: event.deskripsi,
                   primaryColor: AppColors.primary,
-                  registerButtonText:
-                      controller.isUserLoggedIn.value? (controller.canRegister(event)?  "Daftar Acara" : "Pendaftaran Ditutup")  : "Login Untuk Mendaftar",
-                      // controller.eventDetail.value?.statusAcara != "Akan Datang"
-                      // ? 'Pendaftaran Ditutup'
-                      // : (controller.isUserLoggedIn.value
-                      //       ? (controller.isRegistered.value
-                      //             ? 'Sudah Daftar'
-                      //             : 'Daftar Sekarang')
-                      //       : 'Login Untuk Mendaftar'),
-                  onRegister:
-                      // controller.isUserLoggedIn.value &&
-                      //     !controller.isRegistered.value &&
-                      //     controller.eventDetail.value?.statusAcara !=
-                      //         "Akan Datang"
-                      // ? () {
-                      //     RegisterEventPopup.show(
-                      //       context,
-                      //       onSubmit: (agree, offline, online) {},
-                      //       eventId: controller.eventDetail.value!.id,
-                      //     );
-                      //   }
-                      // : null,
-                      controller.isUserLoggedIn.value? (controller.canRegister(event)? (){
-                        RegisterEventPopup.show(
-                                context,
-                                onSubmit: (agree, offline, online) {},
-                                eventId: controller.eventDetail.value!.id,
-                              );
-                      } : (){
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text("Konfirmasi"),
-                              content: const Text("Anda yakin membatalkan acara ini?"),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: const Text("Tidak"),
-                                  onPressed: () {
-                                    Get.back();
-                                  },
-                                ),
-                                TextButton(
-                                  child: const Text("Ya"),
-                                  onPressed: () {
-                                    // TODO: call controller to cancel registration
-                                    Get.back();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }) : null,
+                  shareUrl: 'https://airnav-event.vercel.app/user/event/${event.id}',
 
-                  shareUrl:
-                      'https://airnav-event.vercel.app/user/event/${event.id}',
+                  isLoggedIn: controller.isUserLoggedIn.value,
+                  isRegistered: controller.isRegistered.value,
+                  registrationStartDate: registrationStartDate,
+                  registrationEndDate: registrationEndDate,
+                  eventStartDate: eventStartDate,
+                  eventEndDate: eventEndDate,
+                  isAttendanceActive: event.presensiAktif,
+                  
+                  onLogin: controller.goToLogin,
+                  onRegister: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Daftar Acara'),
+                        content: const Text('Apakah Anda ingin mendaftar acara ini?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Get.back(),
+                            child: const Text('Tidak'),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                            onPressed: () async {
+                              Get.back();
+                              final errorMessage = await controller.register(eventId);
+                              if (errorMessage == null) {
+                                SuccessRegister.show(context, title: 'SUCCESS', subtitle: 'Pendaftaran Berhasil');
+                              } else {
+                                FailRegister.show(context, title: 'FAILED', subtitle: errorMessage);
+                              }
+                            },
+                            child: const Text('Daftar', style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  onCancelRegistration: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Batal Pendaftaran'),
+                        content: const Text('Apakah Anda yakin ingin membatalkan pendaftaran acara ini?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Get.back(),
+                            child: const Text('Tidak'),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                            onPressed: () async {
+                              Get.back();
+                              final errorMessage = await controller.cancelRegistration(eventId);
+                              if (errorMessage == null) {
+                                SuccessRegister.show(context, title: 'SUCCESS', subtitle: 'Pembatalan Berhasil');
+                              } else {
+                                FailRegister.show(context, title: 'FAILED', subtitle: errorMessage);
+                              }
+                            },
+                            child: const Text('Batalkan', style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  onScan: controller.scanQrCode,
                 ),
                 const SizedBox(height: 16),
-                controller.isRegistered.value
-                    ? SectionTileCard(
-                        leadingIcon: Icons.description_outlined,
-                        iconColor: AppColors.primary,
-                        title: 'Susunan Acara',
-                        trailing: IconButton(
-                          onPressed:(){
-                                    if (data.modulAcara?.mdlFileRundownUrl != null){
-                                      Get.snackbar('Susunan Acara', data.modulAcara!.mdlFileRundownUrl!);
-                                      Utils.openUrl(data.modulAcara!.mdlFileRundownUrl!);
-                                    }
-                          },
-                          icon: const Icon(Icons.download_rounded),
-                          color: AppColors.primary,
-                        ),
-                        onTap: () {},
-                      )
-                    : const SizedBox.shrink(),
-                const SizedBox(height: 10),
-                controller.isRegistered.value
-                    ? SectionTileCard(
-                        leadingIcon: Icons.menu_book_outlined,
-                        iconColor: AppColors.primary,
-                        title: 'Modul Acara',
-                        trailing: IconButton(
-                          onPressed:(){
-                            if (data.modulAcara?.mdlFileAcaraUrl != null){
-                              Get.snackbar('Modul Acara', data.modulAcara!.mdlFileAcaraUrl!);
-                              Utils.openUrl(data.modulAcara!.mdlFileAcaraUrl!);
-                            }
-                          },
-                          icon: const Icon(Icons.download_rounded),
-                          color: AppColors.primary,
-                        ),
-                        onTap: () {},
-                      )
-                    : const SizedBox.shrink(),
-                const SizedBox(height: 16),
+                if(controller.isRegistered.value) ...[
+                   SectionTileCard(
+                    leadingIcon: Icons.description_outlined,
+                    iconColor: AppColors.primary,
+                    title: 'Susunan Acara',
+                    trailing: IconButton(
+                      onPressed:(){
+                        if (event.fileRundown != null){
+                          Utils.openUrl(event.fileRundown);
+                        }
+                      },
+                      icon: const Icon(Icons.download_rounded),
+                      color: AppColors.primary,
+                    ),
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 10),
+                  SectionTileCard(
+                    leadingIcon: Icons.menu_book_outlined,
+                    iconColor: AppColors.primary,
+                    title: 'Modul Acara',
+                    trailing: IconButton(
+                      onPressed:(){
+                         if (event.fileAcara != null){
+                          Utils.openUrl(event.fileAcara);
+                        }
+                      },
+                      icon: const Icon(Icons.download_rounded),
+                      color: AppColors.primary,
+                    ),
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 InfoListCard(
                   title: 'Informasi Acara',
                   items: [
@@ -165,16 +178,16 @@ class DetailPage extends GetView<EventDetailController> {
                     InfoItem(
                       label: 'Pendaftaran',
                       value:
-                          '${event.pendaftaran?.mulai ?? ''} - ${event.pendaftaran?.selesai ?? ''}',
+                      '${event.pendaftaran.mulai ?? ''} - ${event.pendaftaran.selesai ?? ''}',
                     ),
                     InfoItem(
                       label: 'Jam Acara',
                       value:
-                          '${event.acara?.mulaiRaw ?? ''} - ${event.acara?.selesaiRaw ?? ''}',
+                      '${event.acara.mulai ?? ''} - ${event.acara.selesai ?? ''}',
                     ),
                     InfoItem(
                       label: 'Tanggal Acara',
-                      value: event.acara?.mulai ?? '',
+                      value: event.acara.mulai,
                     ),
                   ],
                 ),
@@ -182,7 +195,7 @@ class DetailPage extends GetView<EventDetailController> {
                 if (event.catatan != null && event.catatan!.isNotEmpty)
                   AdditionalInfoCard(
                     title: 'Informasi Tambahan',
-                    contentLines: event.catatan!.split(''),
+                    contentLines: event.catatan!.split('\n'),
                   ),
               ],
             ),

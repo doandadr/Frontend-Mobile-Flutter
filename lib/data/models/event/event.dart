@@ -61,15 +61,6 @@ class Event extends Equatable {
   @JsonKey(name: 'is_public')
   final int isPublic;
 
-  @JsonKey(name: 'mdl_presensi_aktif')
-  final int presensiAktif;
-
-  @JsonKey(name: 'mdl_sertifikat_aktif')
-  final int sertifikatAktif;
-
-  @JsonKey(name: 'mdl_doorprize_aktif')
-  final int doorprizeAktif;
-
   @JsonKey(name: 'media_urls')
   final MediaUrls? mediaUrls;
 
@@ -93,9 +84,6 @@ class Event extends Equatable {
     this.acaraSelesai,
     required this.status,
     required this.isPublic,
-    required this.presensiAktif,
-    required this.sertifikatAktif,
-    required this.doorprizeAktif,
     this.mediaUrls,
   });
 
@@ -125,9 +113,6 @@ class Event extends Equatable {
         acaraSelesai,
         status,
         isPublic,
-        presensiAktif,
-        sertifikatAktif,
-        doorprizeAktif,
         mediaUrls,
       ];
 }

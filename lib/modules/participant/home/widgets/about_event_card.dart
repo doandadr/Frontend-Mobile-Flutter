@@ -5,34 +5,96 @@ import '../../../../core/utils.dart';
 
 class AboutEventCard extends StatelessWidget {
   final Widget titleWidget;
-  final bool isRegistered;
   final String description;
-  final VoidCallback? onRegister;
   final Color primaryColor;
-  final Color secondaryColor;
-  final String registerButtonText;
 
   ///(contoh: https://airnav-event.vercel.app/user/event/21)
   final String shareUrl;
-
-
   final String? shareMessage;
+
+  final bool isLoggedIn;
+  final bool isRegistered;
+  final DateTime registrationStartDate;
+  final DateTime registrationEndDate;
+  final DateTime eventStartDate;
+  final DateTime eventEndDate;
+  final int isAttendanceActive;
+
+  final VoidCallback? onRegister;
+  final VoidCallback? onCancelRegistration;
+  final VoidCallback? onScan;
+  final VoidCallback? onLogin;
 
   const AboutEventCard({
     super.key,
-    required this.isRegistered,
     required this.titleWidget,
     required this.description,
-    required this.onRegister,
-    required this.registerButtonText,
     required this.shareUrl,
     this.shareMessage,
     this.primaryColor = const Color(0xFF005EA2),
-    this.secondaryColor = const Color(0xff075f47),
+
+    required this.isLoggedIn,
+    required this.isRegistered,
+    required this.registrationStartDate,
+    required this.registrationEndDate,
+    required this.eventStartDate,
+    required this.eventEndDate,
+    required this.isAttendanceActive,
+    this.onRegister,
+    this.onCancelRegistration,
+    this.onScan,
+    this.onLogin,
   });
 
   @override
   Widget build(BuildContext context) {
+    String buttonText;
+    Color buttonColor;
+    VoidCallback? onPressed;
+    final now = DateTime.now();
+
+    if (!isLoggedIn) {
+      buttonText = 'Login Untuk Mendaftar';
+      buttonColor = Colors.grey;
+      onPressed = onLogin; 
+    } else if (!isRegistered) {
+      // User login belum daftar
+      if (now.isBefore(registrationStartDate)) {
+        buttonText = 'Belum Dibuka';
+        buttonColor = Colors.grey;
+        onPressed = null;
+      } else if (now.isAfter(registrationEndDate)) {
+        buttonText = 'Pendaftaran Ditutup';
+        buttonColor = Colors.grey;
+        onPressed = null;
+      } else {
+        buttonText = 'Daftar Acara';
+        buttonColor = primaryColor;
+        onPressed = onRegister;
+      }
+    } else {
+      // User login, sudah daftar
+      if (now.isBefore(eventStartDate)) {
+        buttonText = 'Batal Pendaftaran';
+        buttonColor = Colors.red;
+        onPressed = onCancelRegistration;
+      } else if (now.isAfter(eventEndDate)) {
+        buttonText = 'Absensi Ditutup';
+        buttonColor = Colors.grey;
+        onPressed = null;
+      } else {
+        if (isAttendanceActive == 1) {
+          buttonText = 'Scan Absensi';
+          buttonColor = primaryColor;
+          onPressed = onScan;
+        } else {
+          buttonText = 'Belum Dimulai';
+          buttonColor = Colors.grey;
+          onPressed = null;
+        }
+      }
+    }
+
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -55,16 +117,17 @@ class AboutEventCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onRegister,
+                onPressed: onPressed,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isRegistered ? secondaryColor : primaryColor,
+                  backgroundColor: buttonColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
+                  disabledBackgroundColor: Colors.grey.shade500,
                 ),
                 child: Text(
-                  registerButtonText,
+                  buttonText,
                   style: const TextStyle(fontSize: 15, color: Colors.white),
                 ),
               ),

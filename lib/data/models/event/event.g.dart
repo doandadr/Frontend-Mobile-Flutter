@@ -26,9 +26,6 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   acaraSelesai: json['mdl_acara_selesai'] as String?,
   status: json['mdl_status'] as String,
   isPublic: (json['is_public'] as num).toInt(),
-  presensiAktif: (json['mdl_presensi_aktif'] as num).toInt(),
-  sertifikatAktif: (json['mdl_sertifikat_aktif'] as num).toInt(),
-  doorprizeAktif: (json['mdl_doorprize_aktif'] as num).toInt(),
   mediaUrls: json['media_urls'] == null
       ? null
       : MediaUrls.fromJson(json['media_urls'] as Map<String, dynamic>),
@@ -54,9 +51,6 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'mdl_acara_selesai': instance.acaraSelesai,
   'mdl_status': instance.status,
   'is_public': instance.isPublic,
-  'mdl_presensi_aktif': instance.presensiAktif,
-  'mdl_sertifikat_aktif': instance.sertifikatAktif,
-  'mdl_doorprize_aktif': instance.doorprizeAktif,
   'media_urls': instance.mediaUrls,
 };
 

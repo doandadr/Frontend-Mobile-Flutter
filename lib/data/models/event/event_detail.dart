@@ -1,152 +1,3 @@
-// import 'package:equatable/equatable.dart';
-// import 'package:json_annotation/json_annotation.dart';
-//
-// part 'event_detail.g.dart';
-//
-// @JsonSerializable()
-// class EventDetailResponse extends Equatable {
-//   EventDetailResponse({
-//     required this.success,
-//     required this.message,
-//     required this.data,
-//   });
-//
-//   final bool success;
-//   final String message;
-//   final Data? data;
-//
-//   factory EventDetailResponse.fromJson(Map<String, dynamic> json) => _$EventDetailResponseFromJson(json);
-//
-//   Map<String, dynamic> toJson() => _$EventDetailResponseToJson(this);
-//
-//   @override
-//   List<Object?> get props => [
-//     success, message, data, ];
-// }
-//
-// @JsonSerializable()
-// class Data extends Equatable {
-//   Data({
-//     required this.event,
-//   });
-//
-//   final Event? event;
-//
-//   factory Data.fromJson(Map<String, dynamic> json) => _$DataFromJson(json);
-//
-//   Map<String, dynamic> toJson() => _$DataToJson(this);
-//
-//   @override
-//   List<Object?> get props => [
-//     event, ];
-// }
-//
-// @JsonSerializable()
-// class Event extends Equatable {
-//   Event({
-//     required this.id,
-//     required this.kode,
-//     required this.slug,
-//     required this.nama,
-//     required this.deskripsi,
-//     required this.tipe,
-//     required this.statusAcara,
-//     required this.lokasi,
-//     required this.latitude,
-//     required this.longitude,
-//     required this.radius,
-//     required this.pendaftaran,
-//     required this.acara,
-//     required this.kapasitas,
-//     required this.status,
-//     required this.banner,
-//     required this.catatan,
-//     required this.createdAt,
-//   });
-//
-//   final int id;
-//   final String kode;
-//   final String slug;
-//   final String nama;
-//   final String deskripsi;
-//   final String tipe;
-//
-//   @JsonKey(name: 'status_acara')
-//   final String statusAcara;
-//   final String lokasi;
-//   final dynamic latitude;
-//   final dynamic longitude;
-//   final dynamic radius;
-//   final Acara? pendaftaran;
-//   final Acara? acara;
-//   final Kapasitas? kapasitas;
-//   final String status;
-//   final String banner;
-//   final String catatan;
-//
-//   @JsonKey(name: 'created_at')
-//   final String createdAt;
-//
-//   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
-//
-//   Map<String, dynamic> toJson() => _$EventToJson(this);
-//
-//   @override
-//   List<Object?> get props => [
-//     id, kode, slug, nama, deskripsi, tipe, statusAcara, lokasi, latitude, longitude, radius, pendaftaran, acara, kapasitas, status, banner, catatan, createdAt, ];
-// }
-//
-// @JsonSerializable()
-// class Acara extends Equatable {
-//   Acara({
-//     required this.mulai,
-//     required this.selesai,
-//     required this.mulaiRaw,
-//     required this.selesaiRaw,
-//     required this.isOpen,
-//   });
-//
-//   final String mulai;
-//   final String selesai;
-//
-//   @JsonKey(name: 'mulai_raw')
-//   final DateTime? mulaiRaw;
-//
-//   @JsonKey(name: 'selesai_raw')
-//   final DateTime? selesaiRaw;
-//
-//   @JsonKey(name: 'is_open')
-//   final bool isOpen;
-//
-//   factory Acara.fromJson(Map<String, dynamic> json) => _$AcaraFromJson(json);
-//
-//   Map<String, dynamic> toJson() => _$AcaraToJson(this);
-//
-//   @override
-//   List<Object?> get props => [
-//     mulai, selesai, mulaiRaw, selesaiRaw, isOpen, ];
-// }
-//
-// @JsonSerializable()
-// class Kapasitas extends Equatable {
-//   Kapasitas({
-//     required this.offline,
-//     required this.online,
-//   });
-//
-//   final dynamic offline;
-//   final dynamic online;
-//
-//   factory Kapasitas.fromJson(Map<String, dynamic> json) => _$KapasitasFromJson(json);
-//
-//   Map<String, dynamic> toJson() => _$KapasitasToJson(this);
-//
-//   @override
-//   List<Object?> get props => [
-//     offline, online, ];
-// }
-
-
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -154,22 +5,19 @@ part 'event_detail.g.dart';
 
 @JsonSerializable()
 class EventDetailResponse extends Equatable {
-  EventDetailResponse({
+  final bool success;
+  final String message;
+  final EventDetailData data;
+
+  const EventDetailResponse({
     required this.success,
     required this.message,
-    this.data,
+    required this.data,
   });
-
-  // kalau mau ekstra aman: @JsonKey(defaultValue: false)
-  final bool success;
-
-  // kalau mau ekstra aman: @JsonKey(defaultValue: '')
-  final String message;
-
-  final Data? data;
 
   factory EventDetailResponse.fromJson(Map<String, dynamic> json) =>
       _$EventDetailResponseFromJson(json);
+
   Map<String, dynamic> toJson() => _$EventDetailResponseToJson(this);
 
   @override
@@ -177,83 +25,107 @@ class EventDetailResponse extends Equatable {
 }
 
 @JsonSerializable()
-class Data extends Equatable {
-  Data({this.event});
+class EventDetailData extends Equatable {
+  final EventDetail event;
 
-  final Event? event;
+  const EventDetailData({
+    required this.event,
+  });
 
-  factory Data.fromJson(Map<String, dynamic> json) => _$DataFromJson(json);
-  Map<String, dynamic> toJson() => _$DataToJson(this);
+  factory EventDetailData.fromJson(Map<String, dynamic> json) =>
+      _$EventDetailDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$EventDetailDataToJson(this);
 
   @override
   List<Object?> get props => [event];
 }
 
 @JsonSerializable()
-class Event extends Equatable {
-  Event({
+class EventDetail extends Equatable {
+  final int id;
+  final String kode;
+  final String slug;
+  final String nama;
+  final String deskripsi;
+
+  @JsonKey(name: 'mdl_kode_qr')
+  final String? mdlKodeQr;
+
+  @JsonKey(name: 'mdl_presensi_aktif')
+  final int presensiAktif;
+
+  @JsonKey(name: 'mdl_file_acara')
+  final String? fileAcara;
+
+  @JsonKey(name: 'mdl_file_rundown')
+  final String? fileRundown;
+
+  @JsonKey(name: 'mdl_template_sertifikat')
+  final String? templateSertifikat;
+
+  @JsonKey(name: 'mdl_link_wa')
+  final String? linkWa;
+
+  @JsonKey(name: 'mdl_kategori')
+  final String? kategori;
+
+  final String tipe;
+
+  @JsonKey(name: 'status_acara')
+  final String statusAcara;
+
+  final String? lokasi;
+  final String? latitude;
+  final String? longitude;
+  final int? radius;
+  final Pendaftaran pendaftaran;
+  final Acara acara;
+  final Kapasitas kapasitas;
+  final String? status;
+
+  @JsonKey(name: 'sertifikat_aktif')
+  final int sertifikatAktif;
+
+  @JsonKey(name: 'doorprize_aktif')
+  final int doorprizeAktif;
+
+  final String? banner;
+  final String? catatan;
+
+  const EventDetail({
     required this.id,
     required this.kode,
     required this.slug,
     required this.nama,
-    this.deskripsi = '',
-    this.tipe = '',
-    this.statusAcara = '',
-    this.lokasi = '',
+    required this.deskripsi,
+    this.mdlKodeQr,
+    required this.presensiAktif,
+    this.fileAcara,
+    this.fileRundown,
+    this.templateSertifikat,
+    this.linkWa,
+    this.kategori,
+    required this.tipe,
+    required this.statusAcara,
+    this.lokasi,
     this.latitude,
     this.longitude,
     this.radius,
-    this.pendaftaran,
-    this.acara,
-    this.kapasitas,
-    this.status = '',
-    this.banner = '',
-    this.catatan = '',
-    this.createdAt = '',
+    required this.pendaftaran,
+    required this.acara,
+    required this.kapasitas,
+    this.status,
+    required this.sertifikatAktif,
+    required this.doorprizeAktif,
+    this.banner,
+    this.catatan,
   });
 
-  @JsonKey(fromJson: _toInt)
-  final int id;
+  factory EventDetail.fromJson(Map<String, dynamic> json) =>
+      _$EventDetailFromJson(json);
 
-  final String kode;
-  final String slug;
-  final String nama;
-
-  @JsonKey(defaultValue: '')
-  final String deskripsi;
-
-  @JsonKey(defaultValue: '')
-  final String tipe;
-
-  @JsonKey(name: 'status_acara', defaultValue: '')
-  final String statusAcara;
-
-  @JsonKey(defaultValue: '')
-  final String lokasi;
-
-  // Bisa number/null — biarkan dynamic
-  final dynamic latitude;
-  final dynamic longitude;
-  final dynamic radius;
-
-  final Acara? pendaftaran;
-  final Acara? acara;
-  final Kapasitas? kapasitas;
-
-  @JsonKey(defaultValue: '')
-  final String status;
-
-  @JsonKey(defaultValue: '')
-  final String banner;
-
-  @JsonKey(defaultValue: '')
-  final String catatan;
-
-  @JsonKey(name: 'created_at', defaultValue: '')
-  final String createdAt;
-
-  factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
-  Map<String, dynamic> toJson() => _$EventToJson(this);
+  Map<String, dynamic> toJson() => _$EventDetailToJson(this);
 
   @override
   List<Object?> get props => [
@@ -262,6 +134,13 @@ class Event extends Equatable {
     slug,
     nama,
     deskripsi,
+    mdlKodeQr,
+    presensiAktif,
+    fileAcara,
+    fileRundown,
+    templateSertifikat,
+    linkWa,
+    kategori,
     tipe,
     statusAcara,
     lokasi,
@@ -272,72 +151,84 @@ class Event extends Equatable {
     acara,
     kapasitas,
     status,
+    sertifikatAktif,
+    doorprizeAktif,
     banner,
     catatan,
-    createdAt,
   ];
+}
 
-  static int _toInt(dynamic v) =>
-      v is int ? v : int.parse(v.toString());
+@JsonSerializable()
+class Pendaftaran extends Equatable {
+  final String mulai;
+  final String selesai;
+
+  @JsonKey(name: 'mulai_raw')
+  final DateTime mulaiRaw;
+
+  @JsonKey(name: 'selesai_raw')
+  final DateTime selesaiRaw;
+
+  @JsonKey(name: 'is_open')
+  final bool? isOpen;
+
+  const Pendaftaran({
+    required this.mulai,
+    required this.selesai,
+    required this.mulaiRaw,
+    required this.selesaiRaw,
+    this.isOpen,
+  });
+
+  factory Pendaftaran.fromJson(Map<String, dynamic> json) =>
+      _$PendaftaranFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PendaftaranToJson(this);
+
+  @override
+  List<Object?> get props => [mulai, selesai, mulaiRaw, selesaiRaw, isOpen];
 }
 
 @JsonSerializable()
 class Acara extends Equatable {
-  Acara({
-    this.mulai = '',
-    this.selesai = '',
-    this.mulaiRaw,
-    this.selesaiRaw,
-    this.isOpen = false,
-  });
-
-  @JsonKey(defaultValue: '')
   final String mulai;
+  final String? selesai;
 
-  @JsonKey(defaultValue: '')
-  final String selesai;
+  @JsonKey(name: 'mulai_raw')
+  final DateTime mulaiRaw;
 
-  @JsonKey(name: 'mulai_raw', fromJson: _toDateTimeNullable)
-  final DateTime? mulaiRaw;
-
-  @JsonKey(name: 'selesai_raw', fromJson: _toDateTimeNullable)
+  @JsonKey(name: 'selesai_raw')
   final DateTime? selesaiRaw;
 
-  @JsonKey(name: 'is_open', fromJson: _toBool, defaultValue: false)
-  final bool isOpen;
+  const Acara({
+    required this.mulai,
+    this.selesai,
+    required this.mulaiRaw,
+    this.selesaiRaw,
+  });
 
-  factory Acara.fromJson(Map<String, dynamic> json) => _$AcaraFromJson(json);
+  factory Acara.fromJson(Map<String, dynamic> json) =>
+      _$AcaraFromJson(json);
+
   Map<String, dynamic> toJson() => _$AcaraToJson(this);
 
   @override
-  List<Object?> get props => [mulai, selesai, mulaiRaw, selesaiRaw, isOpen];
-
-  static DateTime? _toDateTimeNullable(dynamic v) {
-    if (v == null || (v is String && v.isEmpty)) return null;
-    if (v is String) return DateTime.tryParse(v);
-    return null;
-  }
-
-  static bool _toBool(dynamic v) {
-    if (v is bool) return v;
-    if (v is num) return v != 0;
-    if (v is String) {
-      final s = v.toLowerCase();
-      return s == 'true' || s == '1' || s == 'yes' || s == 'open';
-    }
-    return false;
-  }
+  List<Object?> get props => [mulai, selesai, mulaiRaw, selesaiRaw];
 }
 
 @JsonSerializable()
 class Kapasitas extends Equatable {
-  Kapasitas({this.offline, this.online});
+  final int? offline;
+  final int? online;
 
-  final dynamic offline;
-  final dynamic online;
+  const Kapasitas({
+    this.offline,
+    this.online,
+  });
 
   factory Kapasitas.fromJson(Map<String, dynamic> json) =>
       _$KapasitasFromJson(json);
+
   Map<String, dynamic> toJson() => _$KapasitasToJson(this);
 
   @override

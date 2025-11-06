@@ -1,14 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+
 part 'followed_event.g.dart';
 
 @JsonSerializable()
 class FollowedEvent extends Equatable {
-  FollowedEvent({
-    required this.success,
-    required this.message,
-    required this.data,
-  });
+  FollowedEvent({required this.success, required this.message, this.data});
 
   final bool success;
   final String message;
@@ -27,16 +24,16 @@ class FollowedEvent extends Equatable {
 class Data extends Equatable {
   Data({
     required this.currentPage,
-    required this.data,
+    this.data,
     required this.firstPageUrl,
     required this.from,
     required this.lastPage,
     required this.lastPageUrl,
-    required this.links,
-    required this.nextPageUrl,
+    this.links,
+    this.nextPageUrl,
     required this.path,
     required this.perPage,
-    required this.prevPageUrl,
+    this.prevPageUrl,
     required this.to,
     required this.total,
   });
@@ -104,12 +101,12 @@ class Datum extends Equatable {
     required this.modulAcaraId,
     required this.userId,
     required this.metodeDaftar,
-    required this.waktuDaftar,
+    this.waktuDaftar,
     required this.hasDoorprize,
-    required this.noSertifikat,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.modulAcara,
+    this.noSertifikat,
+    this.createdAt,
+    this.updatedAt,
+    this.modulAcara,
   });
 
   final int id;
@@ -170,14 +167,14 @@ class ModulAcara extends Equatable {
     required this.mdlNama,
     required this.mdlKategori,
     required this.mdlTipe,
-    required this.mdlLokasi,
-    required this.mdlAcaraMulai,
-    required this.mdlAcaraSelesai,
+    this.mdlLokasi,
+    this.mdlAcaraMulai,
+    this.mdlAcaraSelesai,
     required this.mdlStatus,
-    required this.mdlKodeQr,
-    required this.mdlBannerAcaraUrl,
-    required this.mdlFileAcaraUrl,
-    required this.mdlFileRundownUrl,
+    this.mdlKodeQr,
+    this.mdlBannerAcaraUrl,
+    this.mdlFileAcaraUrl,
+    this.mdlFileRundownUrl,
   });
 
   final int id;
@@ -254,12 +251,7 @@ class ModulAcara extends Equatable {
 
 @JsonSerializable()
 class Link extends Equatable {
-  Link({
-    required this.url,
-    required this.label,
-    required this.page,
-    required this.active,
-  });
+  Link({this.url, required this.label, this.page, required this.active});
 
   // bisa null pada item «Previous»
   final String? url;
@@ -278,8 +270,6 @@ class Link extends Equatable {
   @override
   List<Object?> get props => [url, label, page, active];
 }
-
-
 
 // import 'package:equatable/equatable.dart';
 // import 'package:json_annotation/json_annotation.dart';
