@@ -13,7 +13,7 @@ class RegisterRequest extends Equatable {
   @JsonKey(name: "password_confirmation")
   final String passwordConfirmation;
   @JsonKey(name: "status_karyawan")
-  final int statusKaryawan;
+  final String statusKaryawan;
 
   const RegisterRequest({
     required this.name,

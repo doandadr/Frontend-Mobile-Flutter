@@ -14,7 +14,7 @@ RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) =>
       telp: json['telp'] as String,
       password: json['password'] as String,
       passwordConfirmation: json['password_confirmation'] as String,
-      statusKaryawan: (json['status_karyawan'] as num).toInt(),
+      statusKaryawan: json['status_karyawan'] as String,
     );
 
 Map<String, dynamic> _$RegisterRequestToJson(RegisterRequest instance) =>

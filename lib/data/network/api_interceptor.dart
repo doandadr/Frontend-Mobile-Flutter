@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -17,20 +18,24 @@ class ApiInterceptor extends Interceptor {
       options.headers["Authorization"] = "Bearer $token";
     }
     options.headers["Accept"] = "application/json";
-    // TODO check if unneeded header returns error
 
     super.onRequest(options, handler);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    // TODO: implement onError
     final response = err.response;
     Color failColor = Colors.redAccent;
+
     if (response != null) {
       switch (response.statusCode) {
+        case 200:
+          Get.snackbar("Success", response.data["message"] ?? "Operation successful",backgroundColor: Colors.green);
+          break;
+        case 201:
+          Get.snackbar("Created", response.data["message"] ?? "Resource created successfully",backgroundColor: Colors.green);
+          break;
         case 400:
-          // TODO make sure response data message never null
           Get.snackbar("Bad Request", response.data["message"] ?? "Invalid request",backgroundColor: failColor);
           break;
         case 401:

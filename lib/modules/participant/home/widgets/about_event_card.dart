@@ -8,7 +8,6 @@ class AboutEventCard extends StatelessWidget {
   final String description;
   final Color primaryColor;
 
-  ///(contoh: https://airnav-event.vercel.app/user/event/21)
   final String shareUrl;
   final String? shareMessage;
 
@@ -84,6 +83,7 @@ class AboutEventCard extends StatelessWidget {
         onPressed = null;
       } else {
         if (isAttendanceActive == 1) {
+          // TODO Add indicator sudah presensi
           buttonText = 'Scan Absensi';
           buttonColor = primaryColor;
           onPressed = onScan;

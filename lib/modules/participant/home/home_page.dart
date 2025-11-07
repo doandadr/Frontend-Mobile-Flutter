@@ -3,6 +3,8 @@ import 'package:frontend_mobile_flutter/core/utils.dart';
 import 'package:frontend_mobile_flutter/modules/participant/activity/widgets/app_bar.dart';
 import 'package:frontend_mobile_flutter/modules/participant/home/home_controller.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../../../app_pages.dart';
 import '../../../core/app_colors.dart';
@@ -46,7 +48,7 @@ class HomePage extends GetView<HomeController> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 5),
             Obx(() {
               final active = controller.activeFilter.value;
               return SingleChildScrollView(
@@ -54,46 +56,28 @@ class HomePage extends GetView<HomeController> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    ChoiceChip.elevated(
-                      elevation: 1,
-                      backgroundColor: const Color(0xFFEBFAFF),
-                      selectedColor: Colors.blue[200],
-                      label: const Text('Semua'),
-                      selected: active == null,
-                      onSelected: (_) {
-                        // Tapping "All" clears filter
-                        controller.activeFilter.value = null;
-                      },
+                    _buildFilterChip(
+                      label: 'Semua',
+                      isSelected: active == null,
+                      onSelected: (_) => controller.activeFilter.value = null,
                     ),
-                    const SizedBox(width: 8),
-                    ChoiceChip.elevated(
-                      elevation: 1,
-                      backgroundColor: const Color(0xFFEBFAFF),
-                      selectedColor: Colors.blue[200],
-                      label: const Text('Berlangsung'),
-                      selected: active == HomeFilter.active,
-                      onSelected: (_) =>
-                          controller.toggleFilter(HomeFilter.active),
+                    const SizedBox(width: 4),
+                    _buildFilterChip(
+                      label: 'Berlangsung',
+                      isSelected: active == HomeFilter.active,
+                      onSelected: (_) => controller.toggleFilter(HomeFilter.active),
                     ),
-                    const SizedBox(width: 8),
-                    ChoiceChip.elevated(
-                      elevation: 1,
-                      backgroundColor: const Color(0xFFEBFAFF),
-                      selectedColor: Colors.blue[200],
-                      label: const Text('Akan Datang'),
-                      selected: active == HomeFilter.upcoming,
-                      onSelected: (_) =>
-                          controller.toggleFilter(HomeFilter.upcoming),
+                    const SizedBox(width: 4),
+                    _buildFilterChip(
+                      label: 'Akan Datang',
+                      isSelected: active == HomeFilter.upcoming,
+                      onSelected: (_) => controller.toggleFilter(HomeFilter.upcoming),
                     ),
-                    const SizedBox(width: 8),
-                    ChoiceChip.elevated(
-                      elevation: 1,
-                      backgroundColor: const Color(0xFFEBFAFF),
-                      selectedColor: Colors.blue[200],
-                      label: const Text('Selesai'),
-                      selected: active == HomeFilter.past,
-                      onSelected: (_) =>
-                          controller.toggleFilter(HomeFilter.past),
+                    const SizedBox(width: 4),
+                    _buildFilterChip(
+                      label: 'Selesai',
+                      isSelected: active == HomeFilter.past,
+                      onSelected: (_) => controller.toggleFilter(HomeFilter.past),
                     ),
                   ],
                 ),
@@ -134,6 +118,35 @@ class HomePage extends GetView<HomeController> {
       ),
     );
   }
+
+  // Widget private untuk membuat chip filter dengan gaya yang konsisten.
+  Widget _buildFilterChip({
+    required String label,
+    required bool isSelected,
+    required ValueChanged<bool> onSelected,
+  }) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: onSelected,
+      labelStyle: GoogleFonts.poppins(
+        color: isSelected ? Colors.white : Colors.black54,
+        fontWeight: FontWeight.w600,
+        fontSize: 12,
+      ),
+      backgroundColor: Colors.white,
+      selectedColor: const Color(0xFF175FA4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? const Color(0xFF175FA4) : const Color(0xFFE0E0E0),
+          width: 1.5,
+        ),
+      ),
+      showCheckmark: false,
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+    );
+  }
 }
 
 class _EventListTile extends StatelessWidget {
@@ -145,32 +158,37 @@ class _EventListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final waktu = event.acaraMulai;
-    final tanggal = Utils.fromDateTimeToIndonesiaDate(waktu);
-    final jam = Utils.jamMenitSafe(waktu);
+    final tanggal = DateFormat("d MMM yyy", "id_ID").format(waktu);
+    final jam = DateFormat("HH:mm", "id_ID").format(waktu);
     final lokasi = event.lokasi;
 
     Color statusColor;
+    Color textColor;
     String filterText;
 
+    // Switch untuk menentukan warna dan teks berdasarkan status event.
     switch (filterCategory) {
-      case HomeFilter.active:
-        statusColor = Colors.orange.shade100;
+      case HomeFilter.active: // Berlangsung
+        statusColor = const Color(0xFFE8F5E9); // Hijau muda
+        textColor = const Color(0xFF2E7D32); // Hijau tua
         filterText = "Berlangsung";
         break;
-      case HomeFilter.upcoming:
-        statusColor = Colors.green.shade100;
+      case HomeFilter.upcoming: // Akan Datang
+        statusColor = const Color(0xFFFFF8E1); // Kuning muda
+        textColor = const Color(0xFFE67E22); // Oranye/kuning tua
         filterText = "Akan Datang";
         break;
-      case HomeFilter.past:
-        statusColor = Colors.red.shade100;
-        filterText = "Sudah Selesai";
+      case HomeFilter.past: // Selesai
+        statusColor = const Color(0xFFFFEBEE); // Merah muda
+        textColor = const Color(0xFFC62828); // Merah tua
+        filterText = "Selesai";
         break;
-      case HomeFilter.none:
-        filterText = "Segera Hadir";
-        statusColor = Colors.grey.shade100;
+      default:
+        statusColor = Colors.grey.shade200;
+        textColor = Colors.grey.shade800;
+        filterText = "N/A";
         break;
     }
-
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -191,6 +209,10 @@ class _EventListTile extends StatelessWidget {
                       .of(context)
                       .size
                       .width * 0.3,
+                  height: MediaQuery
+                    .of(context)
+                    .size
+                    .width * 0.23,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: event.mediaUrls?.banner != null
@@ -244,12 +266,14 @@ class _EventListTile extends StatelessWidget {
                                 ? (lokasi.length > 13 ? '${lokasi.substring(0, 10)}...' : lokasi)
                                 : "Online",
                           ),
-                          _buildEventInfo(
-                            Icons.circle,
-                            filterText,
-                            backgroundColor: statusColor,
-                            iconSize: 10,
-                            textColor: Colors.black87,
+                           Container(
+                            margin: const EdgeInsets.only(right: 4, bottom: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                            decoration: BoxDecoration(
+                              color: statusColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(filterText, style: TextStyle(fontSize: 12, color: textColor)),
                           ),
                         ],
                       ),
@@ -258,43 +282,44 @@ class _EventListTile extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8.0),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.blue[500]!,
-                    Colors.blue[400]!
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  Get.toNamed(Routes.DETAIL, arguments: {
-                    "id":event.id,
-                    "data":null
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  minimumSize: const Size.fromHeight(30),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                child: const Text(
-                  'Detail Acara',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+            const SizedBox(height: 12),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.blue[800]!,
+                Colors.blue[400]!
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ElevatedButton(
+            onPressed: () {
+              Get.toNamed(Routes.DETAIL, arguments: {
+                "id":event.id,
+                "data":null
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              padding: const EdgeInsets.symmetric(vertical: 1),
+              shadowColor: Colors.transparent,
+              minimumSize: const Size.fromHeight(5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
+            child: const Text(
+              'Detail Acara',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
           ],
         ),
       ),

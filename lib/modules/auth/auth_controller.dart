@@ -49,7 +49,7 @@ class AuthController extends GetxController {
     required String telp,
     required String password,
     required String confirmPassword,
-    required int statusKaryawan,
+    required String statusKaryawan,
   }) async {
     final result = await authService.register(
       RegisterRequest(
@@ -62,7 +62,8 @@ class AuthController extends GetxController {
         statusKaryawan: statusKaryawan,
       ),
     );
-
+    print('register result: $result');
+    print('status karyawan: $statusKaryawan');
     if (!result.success) {
       return result.message + result.errors.toString();
     }

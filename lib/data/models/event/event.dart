@@ -41,19 +41,19 @@ class Event extends Equatable {
   final int? radius;
 
   @JsonKey(name: 'mdl_pendaftaran_mulai')
-  final String pendaftaranMulai;
+  final DateTime pendaftaranMulai;
 
   @JsonKey(name: 'mdl_pendaftaran_selesai')
-  final String pendaftaranSelesai;
+  final DateTime pendaftaranSelesai;
 
   @JsonKey(name: 'mdl_maks_peserta_eksternal')
   final int? maksPesertaEksternal;
 
   @JsonKey(name: 'mdl_acara_mulai')
-  final String acaraMulai;
+  final DateTime acaraMulai;
 
   @JsonKey(name: 'mdl_acara_selesai')
-  final String? acaraSelesai;
+  final DateTime? acaraSelesai;
 
   @JsonKey(name: 'mdl_status')
   final String status;

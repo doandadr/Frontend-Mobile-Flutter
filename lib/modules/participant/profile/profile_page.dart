@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:frontend_mobile_flutter/modules/participant/profile/profile_widgets.dart';
 import 'package:frontend_mobile_flutter/modules/participant/profile/widgets/call_to_login.dart';
 import 'package:get/get.dart';

@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:frontend_mobile_flutter/core/app_colors.dart';
 import 'package:frontend_mobile_flutter/modules/event_detail/event_detail_controller.dart';
 import 'package:frontend_mobile_flutter/modules/participant/home/widgets/fail_register.dart';
-import 'package:frontend_mobile_flutter/modules/participant/home/widgets/register_event_popup.dart';
 import 'package:frontend_mobile_flutter/modules/participant/home/widgets/success_register.dart';
 import 'package:get/get.dart';
 import 'package:frontend_mobile_flutter/modules/participant/activity/widgets/app_bar.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/utils.dart';
-import '../../data/models/event/followed_event.dart';
 import '../participant/home/widgets/event_hero_card.dart';
 import '../participant/home/widgets/about_event_card.dart';
 import '../participant/home/widgets/section_tile_card.dart';
@@ -39,10 +38,37 @@ class DetailPage extends GetView<EventDetailController> {
         if (controller.hasData) {
           final event = controller.eventDetail.value!;
 
-          final DateTime registrationStartDate = event.pendaftaranMulai;
-          final DateTime registrationEndDate = event.pendaftaranSelesai;
-          final DateTime eventStartDate =event.acaraMulai;
-          final DateTime eventEndDate =event.acaraSelesai ?? eventStartDate.add(const Duration(days: 1));
+          String eventRegStartShort = DateFormat(
+            "d MMM yyy",
+            "id_ID",
+          ).format(event.pendaftaranMulai);
+          String eventRegEndShort = DateFormat(
+            "d MMM yyy",
+            "id_ID",
+          ).format(event.pendaftaranMulai);
+          String eventStartShort = DateFormat(
+            "d MMM yyy",
+            "id_ID",
+          ).format(event.pendaftaranMulai);
+          String eventRegStartHour = DateFormat(
+            "HH:mm",
+            "id_ID",
+          ).format(event.pendaftaranMulai);
+          String eventRegEndHour = DateFormat(
+            "HH:mm",
+            "id_ID",
+          ).format(event.pendaftaranSelesai);
+          String eventStartHour = DateFormat(
+            "HH:mm",
+            "id_ID",
+          ).format(event.acaraMulai);
+          String eventEndHour = event.acaraSelesai != null
+              ? DateFormat("HH:mm", "id_ID").format(event.acaraSelesai!)
+              : '';
+          String eventStartFull = DateFormat(
+            "d MMMM yyy",
+            "id_ID",
+          ).format(event.acaraMulai);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -53,7 +79,7 @@ class DetailPage extends GetView<EventDetailController> {
                   title: event.nama,
                   location: event.lokasi ?? 'N/A',
                   dateTimeText:
-                  '${event.acaraMulai ?? ''} - ${event.acaraSelesai ?? ''}',
+                      '$eventStartFull, $eventStartHour${event.acaraSelesai != null ? ' - $eventEndHour' : ''}',
                   imageUrl: event.bannerAcara,
                   borderColor: AppColors.primary,
                 ),
@@ -67,40 +93,60 @@ class DetailPage extends GetView<EventDetailController> {
                   ),
                   description: event.deskripsi,
                   primaryColor: AppColors.primary,
-                  shareUrl: 'https://airnav-event.vercel.app/user/event/${event.id}',
+                  shareUrl:
+                      'https://airnav-event.vercel.app/user/event/${event.id}',
 
                   isLoggedIn: controller.isUserLoggedIn.value,
                   isRegistered: controller.isRegistered.value,
-                  registrationStartDate: registrationStartDate,
-                  registrationEndDate: registrationEndDate,
-                  eventStartDate: eventStartDate,
-                  eventEndDate: eventEndDate,
+                  registrationStartDate: event.pendaftaranMulai,
+                  registrationEndDate: event.pendaftaranSelesai,
+                  eventStartDate: event.acaraMulai,
+                  eventEndDate:
+                      event.acaraSelesai ??
+                      event.acaraMulai.add(const Duration(days: 1)),
                   isAttendanceActive: event.presensiAktif,
-                  
+
                   onLogin: controller.goToLogin,
                   onRegister: () {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text('Daftar Acara'),
-                        content: const Text('Apakah Anda ingin mendaftar acara ini?'),
+                        content: const Text(
+                          'Apakah Anda ingin mendaftar acara ini?',
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(),
                             child: const Text('Tidak'),
                           ),
                           ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                            ),
                             onPressed: () async {
                               Get.back();
-                              final errorMessage = await controller.register(eventId);
+                              final errorMessage = await controller.register(
+                                eventId,
+                              );
                               if (errorMessage == null) {
-                                SuccessRegister.show(context, title: 'SUCCESS', subtitle: 'Pendaftaran Berhasil');
+                                SuccessRegister.show(
+                                  context,
+                                  title: 'SUCCESS',
+                                  subtitle: 'Pendaftaran Berhasil',
+                                );
                               } else {
-                                FailRegister.show(context, title: 'FAILED', subtitle: errorMessage);
+                                FailRegister.show(
+                                  context,
+                                  title: 'FAILED',
+                                  subtitle: errorMessage,
+                                );
                               }
                             },
-                            child: const Text('Daftar', style: TextStyle(color: Colors.white)),
+                            child: const Text(
+                              'Daftar',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ],
                       ),
@@ -111,24 +157,40 @@ class DetailPage extends GetView<EventDetailController> {
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text('Batal Pendaftaran'),
-                        content: const Text('Apakah Anda yakin ingin membatalkan pendaftaran acara ini?'),
+                        content: const Text(
+                          'Apakah Anda yakin ingin membatalkan pendaftaran acara ini?',
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(),
                             child: const Text('Tidak'),
                           ),
                           ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
                             onPressed: () async {
                               Get.back();
-                              final errorMessage = await controller.cancelRegistration(eventId);
+                              final errorMessage = await controller
+                                  .cancelRegistration(eventId);
                               if (errorMessage == null) {
-                                SuccessRegister.show(context, title: 'SUCCESS', subtitle: 'Pembatalan Berhasil');
+                                SuccessRegister.show(
+                                  context,
+                                  title: 'SUCCESS',
+                                  subtitle: 'Pembatalan Berhasil',
+                                );
                               } else {
-                                FailRegister.show(context, title: 'FAILED', subtitle: errorMessage);
+                                FailRegister.show(
+                                  context,
+                                  title: 'FAILED',
+                                  subtitle: errorMessage,
+                                );
                               }
                             },
-                            child: const Text('Batalkan', style: TextStyle(color: Colors.white)),
+                            child: const Text(
+                              'Batalkan',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ],
                       ),
@@ -137,14 +199,14 @@ class DetailPage extends GetView<EventDetailController> {
                   onScan: controller.scanQrCode,
                 ),
                 const SizedBox(height: 16),
-                if(controller.isRegistered.value) ...[
-                   SectionTileCard(
+                if (controller.isRegistered.value) ...[
+                  if (event.fileRundown != null) SectionTileCard(
                     leadingIcon: Icons.description_outlined,
                     iconColor: AppColors.primary,
                     title: 'Susunan Acara',
                     trailing: IconButton(
-                      onPressed:(){
-                        if (event.fileRundown != null){
+                      onPressed: () {
+                        if (event.fileRundown != null) {
                           Utils.openUrl(event.fileRundown);
                         }
                       },
@@ -154,13 +216,13 @@ class DetailPage extends GetView<EventDetailController> {
                     onTap: () {},
                   ),
                   const SizedBox(height: 10),
-                  SectionTileCard(
+                  if (event.fileAcara != null) SectionTileCard(
                     leadingIcon: Icons.menu_book_outlined,
                     iconColor: AppColors.primary,
                     title: 'Modul Acara',
                     trailing: IconButton(
-                      onPressed:(){
-                         if (event.fileAcara != null){
+                      onPressed: () {
+                        if (event.fileAcara != null) {
                           Utils.openUrl(event.fileAcara);
                         }
                       },
@@ -174,20 +236,42 @@ class DetailPage extends GetView<EventDetailController> {
                 InfoListCard(
                   title: 'Informasi Acara',
                   items: [
-                    InfoItem(label: 'Alamat', value: event.lokasi ?? 'N/A'),
                     InfoItem(
+                      leading: const Icon(
+                        Icons.location_on_outlined,
+                        size: 20,
+                      ),
+                      label: 'Lokasi',
+                      value: event.lokasi ?? 'N/A',
+                    ),
+                    InfoItem(
+                      leading: const Icon(
+                        Icons.how_to_reg_outlined,
+                        size: 20,
+                      ),
                       label: 'Pendaftaran',
                       value:
-                      '${event.pendaftaranMulai ?? ''} - ${event.pendaftaranSelesai ?? ''}',
+                          '$eventRegStartShort $eventRegStartHour - $eventRegEndShort $eventRegEndHour',
                     ),
                     InfoItem(
+                      leading: const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 20,
+                      ),
+                      label: 'Tanggal Acara',
+                      value: eventStartShort,
+                    ),
+                    InfoItem(
+                      leading: const Icon(
+                        Icons.access_time_rounded,
+                        size: 20,
+                      ),
                       label: 'Jam Acara',
                       value:
-                      '${event.acaraMulai } - ${event.acaraSelesai}',
-                    ),
-                    InfoItem(
-                      label: 'Tanggal Acara',
-                      value: event.acaraMulai.toString(),
+                          eventStartHour +
+                          (event.acaraSelesai != null
+                              ? ' - $eventEndHour'
+                              : ''),
                     ),
                   ],
                 ),

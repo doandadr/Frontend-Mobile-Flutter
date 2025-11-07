@@ -40,7 +40,7 @@ class _AuthPageState extends State<AuthPage> {
   final _loginFormKey = GlobalKey<FormState>();
   final _formKey = GlobalKey<FormState>();
 
-  int _statusKaryawan = 1; // 1 = Karyawan, 0 = Non Karyawan
+  String _statusKaryawan = "1";
 
   Future<void> _onLogin() async {
     if (!_loginFormKey.currentState!.validate()) return;
@@ -57,8 +57,8 @@ class _AuthPageState extends State<AuthPage> {
     setState(() => isLoading = false);
 
     if (result != null) {
-      Get.snackbar("Login Gagal", result,
-          backgroundColor: Colors.redAccent, colorText: Colors.white);
+      // Get.snackbar("Login Gagal", result,
+      //     backgroundColor: Colors.redAccent, colorText: Colors.white);
     } else {
       Get.snackbar("Berhasil", "Login sukses!",
           backgroundColor: Colors.green, colorText: Colors.white);
@@ -90,6 +90,26 @@ class _AuthPageState extends State<AuthPage> {
           backgroundColor: Colors.green, colorText: Colors.white);
     }
   }
+
+// Forget Password 
+  // Future<void> _onRegister() async {
+  //   if (!_formKey.currentState!.validate()) return;
+
+  //   setState(() => isLoading = true);
+  //   final result = await controller.forgetpassword(
+  //     email: _emailReg.text.trim(),
+  //   );
+  //   setState(() => isLoading = false);
+
+  //   if (result != null) {
+  //     Get.to(() => const FailRegister());
+  //   } else {
+  //     Get.to(() => OtpVerificationPage(email: _emailReg.text.trim()));
+  //     Get.snackbar("",
+  //         "Silakan verifikasi email kamu sebelum login.",
+  //         backgroundColor: Colors.green, colorText: Colors.white);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +224,7 @@ class _AuthPageState extends State<AuthPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 26),
+                  const SizedBox(height: 16),
 
                   // Password
                   TextFormField( 
@@ -428,7 +448,7 @@ class _AuthPageState extends State<AuthPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 30),
 
                   // Nama Lengkap
                   TextFormField(
@@ -866,47 +886,38 @@ class _AuthPageState extends State<AuthPage> {
                       Expanded(
                         child: Row(
                           children: [
-                            Radio<int>(
-                              value: 1,
+                            Radio<String>(
+                              value: "1",
                               groupValue: _statusKaryawan,
                               onChanged: (value) {
-                                setState(() {
-                                  _statusKaryawan = value!;
-                                });
+                                setState(() => _statusKaryawan = value!);
                               },
-                              activeColor: Color(0xFF1565C0),
+                              activeColor: const Color(0xFF1565C0),
                             ),
-                            Text(
-                              "Karyawan",
-                              style: TextStyle(fontSize: 14),
-                            ),
+                            const Text("Karyawan", style: TextStyle(fontSize: 14)),
                           ],
                         ),
                       ),
                       Expanded(
                         child: Row(
                           children: [
-                            Radio<int>(
-                              value: 0,
+                            Radio<String>(
+                              value: "0",
                               groupValue: _statusKaryawan,
                               onChanged: (value) {
-                                setState(() {
-                                  _statusKaryawan = value!;
-                                });
+                                setState(() => _statusKaryawan = value!);
                               },
-                              activeColor: Color(0xFF1565C0),
+                              activeColor: const Color(0xFF1565C0),
                             ),
-                            Text(
-                              "Non Karyawan",
-                              style: TextStyle(fontSize: 14),
-                            ),
+                            const Text("Non Karyawan", style: TextStyle(fontSize: 14)),
                           ],
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+
+                  SizedBox(height: 24),
 
                   // Button Daftar
                   SizedBox(

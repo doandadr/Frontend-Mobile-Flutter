@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -119,29 +120,16 @@ class Utils {
 
   String? fromDateTimeIso(DateTime? dt) => dt?.toIso8601String();
 
-  static String fromDateTimeToIndonesiaDate(String raw) {
-    // Try to parse both "2025-10-31 03:01:28" and ISO "2025-10-31T03:01:28Z"
-    DateTime? dt = DateTime.tryParse(raw) ??
-        DateTime.tryParse(raw.replaceFirst(' ', 'T'));
-
-    const bulan = [
-      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-      "Jul", "Agt", "Sep", "Okt", "Nov", "Des"
-    ];
-
-    String? day = dt?.day.toString().padLeft(2, '0');
-    String month = bulan[dt!.month - 1];
-    String? year = dt.year.toString();
-
-    return "$day $month $year";
-  }
-
-  static String jamMenitSafe(String raw) {
-    return raw.substring(11, 16);
+  static DateTime dateTimeParse(String raw) {
+    // Parsing "2025-10-31 03:01:28" dan ISO "2025-10-31T03:01:28Z"
+    return DateTime.tryParse(raw) ??
+        DateTime.parse(raw.replaceFirst(' ', 'T'));
   }
 
   static Future<void> openUrl(String? url) async {
-    print('Opening URL: $url');
+    if (kDebugMode) {
+      print('Opening URL: $url');
+    }
     if (url == null || url.isEmpty) return;
 
     final uri = Uri.parse(url);
@@ -151,7 +139,6 @@ class Utils {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
-  /// Safely parse a date that can be a String, DateTime, or null.
   static DateTime? parseDate(dynamic date) {
     if (date == null) return null;
     if (date is DateTime) return date;
@@ -159,7 +146,7 @@ class Utils {
       try {
         return DateTime.parse(date);
       } catch (_) {
-        return null; // Return null if parsing fails
+        return null;
       }
     }
     return null;

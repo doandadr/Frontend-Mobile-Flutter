@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/app_colors.dart';
+
 class InfoItem {
+  final Icon leading;
   final String label;
   final String value;
-  const InfoItem({required this.label, required this.value});
+
+  const InfoItem({
+    required this.leading,
+    required this.label,
+    required this.value,
+  });
 }
 
 class InfoListCard extends StatelessWidget {
   final String title;
   final List<InfoItem> items;
+
   const InfoListCard({super.key, required this.title, required this.items});
 
   @override
@@ -38,21 +47,36 @@ class InfoListCard extends StatelessWidget {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Text(
-                            e.label,
-                            style: const TextStyle(color: Colors.black),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              e.leading,
+                              const SizedBox(width: 8),
+                              Text(
+                                e.label,
+                                style: const TextStyle(
+                                  color: AppColors.primaryDark,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 4),
                           child: Text(
                             ':',
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(color: AppColors.primaryDark),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Text(e.value),
+                          child: Text(
+                            e.value,
+                            style: const TextStyle(
+                              color: AppColors.primaryDark,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -61,35 +85,6 @@ class InfoListCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  const _InfoRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          IntrinsicWidth(
-            child: Row(
-              children: [
-                Text(label, style: const TextStyle(color: Colors.black)),
-                const SizedBox(width: 4),
-                Text(':', style: const TextStyle(color: Colors.black)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(child: Text(value)),
-        ],
       ),
     );
   }
