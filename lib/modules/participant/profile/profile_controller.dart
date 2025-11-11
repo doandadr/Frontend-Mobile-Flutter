@@ -12,7 +12,7 @@ import '../../../data/network/services/profile_service.dart';
 // Controller untuk mengelola state dan logika halaman profil.
 class ProfileController extends GetxController {
   // -- DEPENDENCIES --
-  final _storage = GetStorage();
+  final _storage = Get.find<GetStorage>();
   final _profileService = Get.find<ProfileService>();
 
   // -- STATE REAKTIF (.obs) --
@@ -206,9 +206,8 @@ class ProfileController extends GetxController {
       final response = await _profileService.logout();
       if (response.success) {
         checkLoginStatus();
-        Get.offAllNamed('/main'); // or your login route
-      } else {
-        Get.snackbar('Gagal', response.message, backgroundColor: Colors.red, colorText: Colors.white);
+        Get.snackbar('Berhasil', 'Anda berhasil keluar.', backgroundColor: Colors.green, colorText: Colors.white);
+        Get.offAllNamed('/login');
       }
     } finally {
       isLoading.value = false;

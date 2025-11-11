@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:frontend_mobile_flutter/data/models/auth/otp_resend_request.dart';
-import 'package:frontend_mobile_flutter/data/models/auth/otp_verify_request.dart';
 import 'package:get/get.dart';
 import '../../core/app_colors.dart';
 import '../../core/text_styles.dart';
 import '../../core/widgets/otp_widgets.dart';
 import 'auth_controller.dart';
-import 'reset_password_page.dart';
-import 'forget_password_page.dart';
+
 
 class OtpVerificationPage extends StatefulWidget {
   final String email;
@@ -81,59 +78,47 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     });
 
     try {
-      // Call actual API through AuthController
-      final error = await _authController.verifyOtp( // TODO replace with actual API call
+      // Call API through AuthController
+      final error = await _authController.verifyOtp(
         email: widget.email,
         otp: otpCode,
       );
-      print('error otp $error');
+      
+      print('OTP Verification Result: ${error == null ? "Success" : "Error: $error"}');
+      
       setState(() {
         isLoading = false;
       });
 
-      if (error == 'Success') {
-        // Success
+      if (error == null) {
+        // Success - OTP verified
         if (widget.isFromRegistration) {
           // Registration flow - go back to login
-          Get.offAllNamed('/auth'); // atau sesuaikan dengan route Anda
+          Get.offAllNamed('/auth');
           Get.snackbar(
             'Berhasil',
             'Registrasi berhasil! Silakan login',
             backgroundColor: Colors.green,
             colorText: Colors.white,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           );
         } else {
-          Get.snackbar(
-            'Gagal',
-            'Ada masalah! Silakan coba lagi',
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-            duration: Duration(seconds: 3),
-          );
-
-          // // Forgot password flow - go to reset password
-          // Get.off(
-          //   () => ResetPasswordPage(
-          //     email: widget.email,
-          //     otp: otpCode, // Pass OTP to reset password page
-          //   ),
-          //   transition: Transition.rightToLeft,
-          //   duration: Duration(milliseconds: 300),
-          // );
+          // Forgot password flow - go to reset password
+         
         }
       } else {
-        // Error
+        // Error - OTP verification failed
         setState(() {
           otpCode = ''; // Clear OTP on error
         });
 
-        // Get.snackbar(
-        //   'Error',
-        //   error!,
-        //   backgroundColor: AppColors.error,
-        //   colorText: Colors.white,
-        // );
+        Get.snackbar(
+          'Gagal',
+          error,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
       }
 
     } catch (e) {
@@ -194,12 +179,12 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         elevation: 0,
         leading: IconButton(
           icon: Container(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: AppColors.primary.withOpacity(0.1),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.arrow_back_ios_new,
               color: AppColors.primary,
               size: 20,
@@ -215,11 +200,11 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
               children: [
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 40),
+                        const SizedBox(height: 40),
 
                         // Title
                         Text(
@@ -229,7 +214,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 30),
 
                         // Subtitle
                         Text(
@@ -239,7 +224,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
 
                         // Description
                         Text(
@@ -252,7 +237,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                             height: 1.5,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
 
                         // Email display
                         Text(
@@ -263,7 +248,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        SizedBox(height: 40),
+                        const SizedBox(height: 40),
 
                         // OTP Boxes
                         Row(
@@ -271,7 +256,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                           children: List.generate(
                             6,
                             (index) => Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 3),
+                              padding: const EdgeInsets.symmetric(horizontal: 3),
                               child: OtpWidgets.buildOtpBox(
                                 position: index,
                                 otpCode: otpCode,
@@ -280,7 +265,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 30),
 
                         // Resend OTP Button
                         TextButton(
@@ -297,7 +282,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -311,7 +296,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                   spacing: 15,
                 ),
 
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -320,7 +305,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
           if (isLoading)
             Container(
               color: Colors.black.withOpacity(0.3),
-              child: Center(
+              child: const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                 ),

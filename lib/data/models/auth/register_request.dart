@@ -23,6 +23,7 @@ class RegisterRequest extends Equatable {
     required this.password,
     required this.passwordConfirmation,
     required this.statusKaryawan,
+
   });
 
   factory RegisterRequest.fromJson(Map<String, dynamic> json) =>
@@ -38,6 +39,6 @@ class RegisterRequest extends Equatable {
     telp,
     password,
     passwordConfirmation,
-    statusKaryawan
+    statusKaryawan,
   ];
 }

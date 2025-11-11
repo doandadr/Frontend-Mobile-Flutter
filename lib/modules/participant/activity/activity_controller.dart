@@ -1,4 +1,3 @@
-import 'package:frontend_mobile_flutter/data/models/event/event_detail.dart';
 import 'package:get/get.dart';
 import 'package:frontend_mobile_flutter/data/network/services/activity_service.dart';
 import 'package:frontend_mobile_flutter/data/models/event/followed_event.dart';
@@ -12,10 +11,10 @@ import '../../../data/models/event/scan_response.dart';
 class ActivityController extends GetxController {
   final ActivityService service = Get.find<ActivityService>();
   final _utils = Utils();
-  final _storage = GetStorage();
+  final _storage = Get.find<GetStorage>();
 
-  final isLoggedIn = false.obs;
-  final isLoading = false.obs;
+  final RxBool isLoggedIn = false.obs;
+  final RxBool isLoading = false.obs;
   final error = RxnString();
   final followedEvents = <Datum>[].obs;
   final selectedFilter = Rxn<ActivityFilter>();

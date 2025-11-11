@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_mobile_flutter/modules/participant/activity/activity_controller.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../../app_pages.dart';
+import '../../../../core/utils.dart';
 
 class ActivityContainer extends StatelessWidget {
   final String eventName;
   final String eventDate;
   final ActivityFilter status;
   final VoidCallback? onTap;
-  final VoidCallback? onActionTap;
+  final bool isPresent;
+  final String? urlSertifikat;
+  final bool? hasDoorprize;
 
   const ActivityContainer({
     super.key,
@@ -14,34 +21,89 @@ class ActivityContainer extends StatelessWidget {
     required this.eventDate,
     required this.status,
     this.onTap,
-    this.onActionTap,
+    required this.isPresent,
+    this.urlSertifikat,
+    this.hasDoorprize,
   });
-
-  // bool get _isSelesai => status == ActivityFilter.selesai;
-  bool get _isBerlangsung => status == ActivityFilter.berlangsung;
-
-  String statusMap(ActivityFilter status) {
-    switch (status) {
-      case ActivityFilter.mendatang:
-        return 'Belum Mulai';
-      case ActivityFilter.berlangsung:
-        return 'Berlangsung';
-      case ActivityFilter.selesai:
-        return 'Selesai';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     const borderBlue = Color(0xFF9ED1F5);
     const headerBlue = Color(0xFFDDF3FF);
     const darkBlue = Color(0xFF10498D);
+    const yellow50 = Color(0xFFFEFCE8);
+    const yellow900 = Color(0xFF713F12);
 
-    final Color statusBg = _isBerlangsung ? const Color(0xFFEFFFF9) : const Color(0xFFFFF6E0);
-    final Color statusText = _isBerlangsung ? const Color(0xFF049E67) : const Color(0xFFD79A00);
-    final Color dotColor = _isBerlangsung ? const Color(0xFF02C26A) : const Color(0xFF9AA3AF);
-    final Color buttonBg = _isBerlangsung ? const Color(0xFF175FA4) : const Color(0xFFD1D5DB);
-    final Color buttonFg = _isBerlangsung ? Colors.white : Colors.black;
+    final String chipText;
+    final String btnText;
+    final IconData btnIcon;
+    final Color statusBgColor;
+    final Color statusTextColor;
+    final Color dotColor;
+    final Color buttonBgColor;
+    final Color buttonFgColor;
+
+    switch (status) {
+      case ActivityFilter.mendatang:
+        chipText = 'Belum Mulai';
+        btnText = 'Menunggu';
+        btnIcon = Icons.access_time;
+        statusBgColor = const Color(0xFFFFF6E0);
+        statusTextColor = const Color(0xFFD79A00);
+        dotColor = const Color(0xFF9AA3AF);
+        buttonBgColor = const Color(0xFFD1D5DB);
+        buttonFgColor = Colors.black;
+        break;
+      case ActivityFilter.berlangsung:
+        chipText = 'Berlangsung';
+        btnText = isPresent ? 'Hadir' : 'Belum Absen';
+        btnIcon = isPresent
+            ? Icons.check_circle_outline_outlined
+            : Icons.qr_code_scanner;
+        statusBgColor = const Color(0xFFEFFFF9);
+        statusTextColor = const Color(0xFF049E67);
+        dotColor = const Color(0xFF02C26A);
+        buttonBgColor = const Color(0xFF175FA4);
+        buttonFgColor = Colors.white;
+        break;
+      case ActivityFilter.selesai:
+        chipText = 'Selesai';
+        btnText = (isPresent && urlSertifikat != null)
+            ? 'Sertifikat'
+            : 'Ditutup';
+        btnIcon = isPresent ? Icons.download : Icons.cancel_outlined;
+        statusBgColor = const Color(0xFFFFF6E0);
+        statusTextColor = const Color(0xFFD79A00);
+        dotColor = const Color(0xFF9AA3AF);
+        buttonBgColor = const Color(0xFFD1D5DB);
+        buttonFgColor = Colors.black;
+        break;
+    }
+
+    VoidCallback? onActionTapHandler;
+    if (status == ActivityFilter.berlangsung) {
+      onActionTapHandler = () {
+        if (isPresent) {
+          Get.snackbar(
+            'Sudah absen',
+            'Anda sudah melakukan absensi untuk event ini',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+        } else {
+          Get.snackbar('Scan QR Code', 'Scan untuk absensi kegiatan.');
+          Get.toNamed(Routes.SCAN);
+        }
+      };
+    } else if (status == ActivityFilter.selesai) {
+      if (isPresent && urlSertifikat != null) {
+        onActionTapHandler = () {
+            Utils.openUrl(urlSertifikat);
+        };
+      } else {
+        onActionTapHandler = null; // Disabled for 'Ditutup'
+      }
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -61,38 +123,36 @@ class ActivityContainer extends StatelessWidget {
               children: [
                 // ===== Header biru =====
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: headerBlue,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start, // penting agar date tetap di pojok saat title tinggi
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Judul event: multi-line
                       Expanded(
                         child: Text(
                           eventName,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             color: darkBlue,
                           ),
                           softWrap: true,
-                          // `maxLines: null` = tanpa batas baris (boleh tinggi)
-                          // Bisa juga batasi misal 3 baris: maxLines: 3, overflow: TextOverflow.ellipsis,
-                          // tapi permintaanmu ingin melebar ke bawah, jadi biar null.
                           maxLines: null,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Tanggal di kanan, tetap satu baris
                       Text(
                         eventDate,
                         textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: darkBlue,
                         ),
                       ),
@@ -102,89 +162,100 @@ class ActivityContainer extends StatelessWidget {
 
                 const SizedBox(height: 14),
 
-                // ===== Bawah =====
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
+                    Column(
                       mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Status:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF7A869A),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-
-                        // chip status
+                        // const Text(
+                        //   'Status :',
+                        //   style: TextStyle(
+                        //     fontSize: 14,
+                        //     fontWeight: FontWeight.w600,
+                        //     color: Color(0xFF7A869A),
+                        //   ),
+                        // ),
+                        // const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: statusBg,
+                            color: statusBgColor,
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Text(
-                            statusMap(status),
-                            style: TextStyle(
-                              color: statusText,
-                              fontWeight: FontWeight.w700,
+                            chipText,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: statusTextColor,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-
-                        // bulatan hijau/abu
+                        if (hasDoorprize == true)
                         Container(
-                          width: 20,
-                          height: 20,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: dotColor,
+                            color: yellow50,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Text(
+                            hasDoorprize == true ? "Pemenang Doorprize" : "",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: yellow900,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
                     ),
 
-                    // tombol kanan
-                    (status == ActivityFilter.mendatang)? SizedBox.shrink() :
-                   TextButton.icon(
-                        onPressed: onActionTap,
-                        icon: Icon(
-                          switch (status) {
-                            ActivityFilter.mendatang =>
-                              Icons.calendar_month,
-                            ActivityFilter.berlangsung =>
-                              Icons.qr_code_scanner,
-                            ActivityFilter.selesai =>
-                              Icons.download,
-                          },
-                          color: buttonFg,
-                        ),
-                        label: Text(
-                          switch (status) {
-                            ActivityFilter.mendatang =>
-                            "Tunggu",
-                            ActivityFilter.berlangsung =>
-                            "Scan",
-                            ActivityFilter.selesai =>
-                            "Sertif",
-                          },
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: buttonFg,
+                    // Bulatan dan Tombol
+                    Row(
+                      children: [
+                        if (status != ActivityFilter.mendatang) ...[
+                          // Container(
+                          //   width: 10,
+                          //   height: 10,
+                          //   decoration: BoxDecoration(
+                          //     shape: BoxShape.circle,
+                          //     color: dotColor,
+                          //   ),
+                          // ),
+                          // const SizedBox(width: 8),
+                          // Kemudian tombol ditampilkan
+                          TextButton.icon(
+                            onPressed: onActionTapHandler,
+                            icon: Icon(btnIcon, color: buttonFgColor),
+                            label: Text(
+                              btnText,
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                                color: buttonFgColor,
+                              ),
+                            ),
+                            style: TextButton.styleFrom(
+                              backgroundColor: buttonBgColor,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 28,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ),
                           ),
-                        ),
-                        style: TextButton.styleFrom(
-                          backgroundColor: buttonBg,
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                        ),
-                      ),
-
+                        ],
+                      ],
+                    ),
                   ],
                 ),
               ],
@@ -195,4 +266,3 @@ class ActivityContainer extends StatelessWidget {
     );
   }
 }
-

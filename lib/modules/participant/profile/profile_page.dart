@@ -174,7 +174,7 @@ class ProfilePage extends GetView<ProfileController> {
                                 ),
                                 ElevatedButton(
                                   onPressed: () {
-                                    Get.offAllNamed('/main');
+                                    Get.back();
                                     controller.logout();
                                   },
                                   style: ElevatedButton.styleFrom(

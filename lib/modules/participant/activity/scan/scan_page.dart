@@ -1,11 +1,12 @@
+// lib/modules/participant/activity/scan/scan_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-
 import 'package:frontend_mobile_flutter/data/models/event/presence.dart';
 import 'package:frontend_mobile_flutter/modules/participant/activity/activity_controller.dart';
 import '../../../../data/models/event/scan_response.dart';
+import '../../../main_container/main_controller.dart';
 
 class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
@@ -14,7 +15,7 @@ class ScanPage extends StatefulWidget {
   State<ScanPage> createState() => _ScanPageState();
 }
 
-class _ScanPageState extends State<ScanPage> {
+class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   final ActivityController c = Get.find<ActivityController>();
 
   final MobileScannerController _scanner = MobileScannerController(
@@ -23,6 +24,9 @@ class _ScanPageState extends State<ScanPage> {
     detectionSpeed: DetectionSpeed.noDuplicates,
     autoZoom: true,
   );
+
+  late final MainController _main;
+  late final Worker _watchIndex; // listener reaktif untuk currentIndex
 
   bool _handled = false;
 
@@ -35,7 +39,50 @@ class _ScanPageState extends State<ScanPage> {
   String? _lastCode;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    _main = Get.find<MainController>();
+
+    // Sinkron awal sesuai tab aktif saat ini
+    _applyIndex(_main.currentIndex.value);
+
+    // start/stop kamera SEGERA saat user ganti tab
+    _watchIndex = ever<int>(_main.currentIndex, (i) => _applyIndex(i));
+  }
+
+  Future<void> _applyIndex(int i) async {
+    if (i == 2) {
+      // Tab Presensi aktif → hidupkan kamera
+      try { await _scanner.start(); } catch (_) {}
+    } else {
+      // Bukan tab Presensi → matikan kamera (hindari buffer penuh)
+      try { await _scanner.stop(); } catch (_) {}
+      // Reset state scan agar bersih saat kembali
+      _handled = false;
+      _lastOk = null;
+      _feedbackTitle = null;
+      _feedbackSubtitle = null;
+      _lastCode = null;
+      if (mounted) setState(() {});
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Aman saat app background/foreground
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      try { _scanner.stop(); } catch (_) {}
+    } else if (state == AppLifecycleState.resumed) {
+      _applyIndex(_main.currentIndex.value);
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _watchIndex.dispose(); // hentikan listener reaktif
     _scanner.dispose();
     super.dispose();
   }
@@ -83,15 +130,6 @@ class _ScanPageState extends State<ScanPage> {
         _feedbackTitle = _titleFrom(ok, msg);
         _feedbackSubtitle = msg;
       });
-      //
-      // Get.snackbar(
-      //   'Presensi',
-      //   msg,
-      //   backgroundColor: ok ? const Color(0xFFEFFFF9) : const Color(0xFFFFF1F0),
-      //   colorText: ok ? const Color(0xFF049E67) : const Color(0xFFB42318),
-      //   snackPosition: SnackPosition.BOTTOM,
-      //   duration: const Duration(seconds: 2),
-      // );
 
       if (ok) {
         Future.delayed(const Duration(milliseconds: 300), () {
@@ -104,15 +142,6 @@ class _ScanPageState extends State<ScanPage> {
         _feedbackTitle = 'Gagal Absen';
         _feedbackSubtitle = 'Gagal memproses: $e';
       });
-
-      // Get.snackbar(
-      //   'Presensi',
-      //   'Gagal memproses: $e',
-      //   backgroundColor: const Color(0xFFFFF1F0),
-      //   colorText: const Color(0xFFB42318),
-      //   snackPosition: SnackPosition.BOTTOM,
-      //   duration: const Duration(seconds: 2),
-      // );
     }
   }
 
@@ -193,13 +222,12 @@ class _ScanPageState extends State<ScanPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Kotak target dengan scrim tipis & corner guides
+                // Kotak target
                 SizedBox(
                   width: 260,
                   height: 260,
                   child: Stack(
                     children: [
-                      // scrim tipis agar kotak terlihat di atas preview kamera
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.12),
@@ -211,13 +239,13 @@ class _ScanPageState extends State<ScanPage> {
                         ),
                       ),
 
-                      // Jika sudah kebaca, render QR dari payload di tengah kotak
+                      // Jika sudah kebaca, render QR dari payload
                       if (_lastCode != null)
                         Center(
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.white, // supaya kontras
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: QrImageView(
@@ -237,7 +265,7 @@ class _ScanPageState extends State<ScanPage> {
                   ),
                 ),
 
-                // Panel hasil (muncul hanya setelah ada respons)
+                // Panel hasil
                 if (_feedbackTitle != null) ...[
                   const SizedBox(height: 18),
                   Container(
@@ -361,4 +389,3 @@ class _CornerGuide extends StatelessWidget {
     );
   }
 }
-

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_disposable.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:get_storage/get_storage.dart';
 
 import '../../models/basic_response.dart';
@@ -12,7 +12,7 @@ import '../endpoints.dart';
 
 class ProfileService extends GetxService {
   final _secure = const FlutterSecureStorage();
-  final _box = GetStorage();
+  final _box = Get.find<GetStorage>();
 
   Future<ProfileResponse> getProfile() async {
     try {

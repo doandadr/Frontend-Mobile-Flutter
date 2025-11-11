@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend_mobile_flutter/core/utils.dart';
 import 'package:frontend_mobile_flutter/modules/participant/activity/widgets/app_bar.dart';
 import 'package:frontend_mobile_flutter/modules/participant/home/home_controller.dart';
 import 'package:get/get.dart';
@@ -20,38 +19,53 @@ class HomePage extends GetView<HomeController> {
       appBar: TAppBar(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            TextField(
-              onChanged: (value) => controller.searchQuery.value = value,
-              decoration: InputDecoration(
-                hintText: "Cari nama, deskripsi, atau lokasi acara",
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.grey[500],
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: const BorderSide(color: Color(0xFFBDBDBD), width: 1.5),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final active = controller.activeFilter.value;
+          final list = controller.visibleEvents;
+
+          return Column(
+            children: [
+              const SizedBox(height: 16),
+              TextField(
+                onChanged: (value) => controller.searchQuery.value = value,
+                decoration: InputDecoration(
+                  hintText: "Cari nama, deskripsi, atau lokasi acara",
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 20,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFE0E0E0),
+                      width: 1.5,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFE0E0E0),
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFBDBDBD),
+                      width: 1.5,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 5),
-            Obx(() {
-              final active = controller.activeFilter.value;
-              return SingleChildScrollView(
+              const SizedBox(height: 5),
+              SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -63,58 +77,80 @@ class HomePage extends GetView<HomeController> {
                     ),
                     const SizedBox(width: 4),
                     _buildFilterChip(
-                      label: 'Berlangsung',
-                      isSelected: active == HomeFilter.active,
-                      onSelected: (_) => controller.toggleFilter(HomeFilter.active),
+                      label: 'Segera Hadir',
+                      isSelected: active == HomeFilter.upcoming,
+                      onSelected: (_) =>
+                          controller.toggleFilter(HomeFilter.upcoming),
                     ),
                     const SizedBox(width: 4),
                     _buildFilterChip(
-                      label: 'Akan Datang',
-                      isSelected: active == HomeFilter.upcoming,
-                      onSelected: (_) => controller.toggleFilter(HomeFilter.upcoming),
+                      label: 'Pendaftaran Dibuka',
+                      isSelected: active == HomeFilter.open,
+                      onSelected: (_) =>
+                          controller.toggleFilter(HomeFilter.open),
+                    ),
+                    const SizedBox(width: 4),
+                    _buildFilterChip(
+                      label: 'Pendaftaran Ditutup',
+                      isSelected: active == HomeFilter.closed,
+                      onSelected: (_) =>
+                          controller.toggleFilter(HomeFilter.closed),
+                    ),
+                    const SizedBox(width: 4),
+                    _buildFilterChip(
+                      label: 'Berlangsung',
+                      isSelected: active == HomeFilter.active,
+                      onSelected: (_) =>
+                          controller.toggleFilter(HomeFilter.active),
                     ),
                     const SizedBox(width: 4),
                     _buildFilterChip(
                       label: 'Selesai',
                       isSelected: active == HomeFilter.past,
-                      onSelected: (_) => controller.toggleFilter(HomeFilter.past),
+                      onSelected: (_) =>
+                          controller.toggleFilter(HomeFilter.past),
                     ),
                   ],
                 ),
-              );
-            }),
-
-            const SizedBox(height: 12),
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                final list = controller.visibleEvents;
-                if (list.isEmpty) {
-                  return const Center(
-                    child: Text('Belum Ada Acara'),
-                  );
-                }
-                return RefreshIndicator(
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: RefreshIndicator(
                   onRefresh: controller.refreshEvents,
-                  child: ListView.separated(
-                    itemCount: list.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-
-                      final Event e = list[index];
-                      return _EventListTile(event: e, filterCategory: controller.getFilter(e),);
-                    },
-                  ),
-                );
-
-              }),
-            ),
-          ],
-        ),
+                  child: list.isEmpty
+                      ? LayoutBuilder(
+                          builder: (context, constraints) {
+                            return ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                SizedBox(
+                                  height: constraints.maxHeight,
+                                  child: const Center(
+                                    child: Text('Belum ada acara'),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        )
+                      : ListView.separated(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          itemCount: list.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
+                          itemBuilder: (context, index) {
+                            final Event e = list[index];
+                            return _EventListTile(
+                              event: e,
+                              filterCategory: controller.getFilter(e),
+                            );
+                          },
+                        ),
+                ),
+              ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -126,7 +162,8 @@ class HomePage extends GetView<HomeController> {
     required ValueChanged<bool> onSelected,
   }) {
     return ChoiceChip(
-      label: Text(label),
+      label: FittedBox(fit: BoxFit.scaleDown,child: Text(label),),
+      clipBehavior: Clip.none,
       selected: isSelected,
       onSelected: onSelected,
       labelStyle: GoogleFonts.poppins(
@@ -140,7 +177,7 @@ class HomePage extends GetView<HomeController> {
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
           color: isSelected ? const Color(0xFF175FA4) : const Color(0xFFE0E0E0),
-          width: 1.5,
+          width: 2,
         ),
       ),
       showCheckmark: false,
@@ -153,7 +190,7 @@ class _EventListTile extends StatelessWidget {
   final Event event;
   final HomeFilter filterCategory;
 
-  const _EventListTile({required this.event,required this.filterCategory});
+  const _EventListTile({required this.event, required this.filterCategory});
 
   @override
   Widget build(BuildContext context) {
@@ -166,21 +203,30 @@ class _EventListTile extends StatelessWidget {
     Color textColor;
     String filterText;
 
-    // Switch untuk menentukan warna dan teks berdasarkan status event.
     switch (filterCategory) {
-      case HomeFilter.active: // Berlangsung
-        statusColor = const Color(0xFFE8F5E9); // Hijau muda
-        textColor = const Color(0xFF2E7D32); // Hijau tua
+      case HomeFilter.upcoming:
+        statusColor = const Color(0xFFFFF8E1);
+        textColor = const Color(0xFFE67E22);
+        filterText = "Segera Hadir";
+        break;
+      case HomeFilter.open:
+        statusColor = const Color(0xFFFFEBEE);
+        textColor = const Color(0xFF0F8ED4);
+        filterText = "Pendaftaran Dibuka";
+        break;
+      case HomeFilter.closed:
+        statusColor = const Color(0xFFFFEBEE);
+        textColor = const Color(0xFF707070);
+        filterText = "Pendaftaran Ditutup";
+        break;
+      case HomeFilter.active:
+        statusColor = const Color(0xFFE8F5E9);
+        textColor = const Color(0xFF2E7D32);
         filterText = "Berlangsung";
         break;
-      case HomeFilter.upcoming: // Akan Datang
-        statusColor = const Color(0xFFFFF8E1); // Kuning muda
-        textColor = const Color(0xFFE67E22); // Oranye/kuning tua
-        filterText = "Akan Datang";
-        break;
-      case HomeFilter.past: // Selesai
-        statusColor = const Color(0xFFFFEBEE); // Merah muda
-        textColor = const Color(0xFFC62828); // Merah tua
+      case HomeFilter.past:
+        statusColor = const Color(0xFFFFEBEE);
+        textColor = const Color(0xFFC62828);
         filterText = "Selesai";
         break;
       default:
@@ -192,9 +238,7 @@ class _EventListTile extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       clipBehavior: Clip.antiAlias,
       child: Padding(
 
@@ -210,26 +254,26 @@ class _EventListTile extends StatelessWidget {
                       .size
                       .width * 0.3,
                   height: MediaQuery
-                    .of(context)
-                    .size
-                    .width * 0.23,
+                      .of(context)
+                      .size
+                      .width * 0.23,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: event.mediaUrls?.banner != null
                         ? Image.network(
-                      event.mediaUrls!.banner!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          'assets/images/placeholder-img.jpg',
-                          fit: BoxFit.cover,
-                        );
-                      },
-                    )
+                            event.mediaUrls!.banner!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                'assets/images/placeholder-img.jpg',
+                                fit: BoxFit.cover,
+                              );
+                            },
+                          )
                         : Image.asset(
-                      'assets/images/placeholder-img.jpg',
-                      fit: BoxFit.cover,
-                    ),
+                            'assets/images/placeholder-img.jpg',
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -252,28 +296,36 @@ class _EventListTile extends StatelessWidget {
                         spacing: 2.0,
                         runSpacing: 2.0,
                         children: [
-                          _buildEventInfo(
-                            Icons.calendar_today,
-                            tanggal,
-                          ),
-                          _buildEventInfo(
-                            Icons.access_time,
-                            jam,
-                          ),
+                          _buildEventInfo(Icons.calendar_today, tanggal),
+                          _buildEventInfo(Icons.access_time, jam),
                           _buildEventInfo(
                             Icons.location_on,
-                            (lokasi != null && lokasi.isNotEmpty)
-                                ? (lokasi.length > 13 ? '${lokasi.substring(0, 10)}...' : lokasi)
+                            (lokasi != null &&
+                                    lokasi.isNotEmpty &&
+                                    event.tipe != "online")
+                                ? (lokasi.length > 13
+                                      ? '${lokasi.substring(0, 10)}...'
+                                      : lokasi)
                                 : "Online",
                           ),
-                           Container(
+                          Container(
                             margin: const EdgeInsets.only(right: 4, bottom: 4),
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 4.0,
+                            ),
                             decoration: BoxDecoration(
                               color: statusColor,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(filterText, style: TextStyle(fontSize: 12, color: textColor)),
+                            child: Text(
+                              filterText,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: textColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -283,43 +335,43 @@ class _EventListTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.blue[800]!,
-                Colors.blue[400]!
-              ],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: ElevatedButton(
-            onPressed: () {
-              Get.toNamed(Routes.DETAIL, arguments: {
-                "id":event.id,
-                "data":null
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              padding: const EdgeInsets.symmetric(vertical: 1),
-              shadowColor: Colors.transparent,
-              minimumSize: const Size.fromHeight(5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blue[800]!,
+                    Colors.blue[400]!
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  Get.toNamed(Routes.DETAIL, arguments: {
+                    "id":event.id,
+                    "data":null
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(vertical: 1),
+                  shadowColor: Colors.transparent,
+                  minimumSize: const Size.fromHeight(5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Detail Acara',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-            child: const Text(
-              'Detail Acara',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
           ],
         ),
       ),
@@ -328,26 +380,25 @@ class _EventListTile extends StatelessWidget {
 }
 
 Widget _buildEventInfo(
-    IconData icon,
-    String label, {
-      Color backgroundColor = AppColors.chipBackground,
-      Color textColor = Colors.black87,
-      double iconSize = 16,
-    }) {
+  IconData icon,
+  String label, {
+  Color backgroundColor = AppColors.chipBackground,
+  Color textColor = Colors.black87,
+  double iconSize = 16,
+}) {
   return Container(
-    margin: const EdgeInsets.only(right: 4, bottom: 4),
-    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-    decoration: BoxDecoration(
-      color: backgroundColor,
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: iconSize, color: textColor),
-        const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 12, color: textColor)),
-      ],
-    ),
-  );
+      margin: const EdgeInsets.only(right: 4, bottom: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: iconSize, color: textColor),
+            const SizedBox(width: 4),
+            Text(label, style: TextStyle(fontSize: 12, color: textColor,)),
+          ],
+),);
 }

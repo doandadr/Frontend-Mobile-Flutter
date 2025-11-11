@@ -46,7 +46,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:frontend_mobile_flutter/core/app_colors.dart';
-import 'package:frontend_mobile_flutter/modules/participant/activity/widgets/notification_button.dart';
 import 'package:frontend_mobile_flutter/modules/participant/profile/profile_controller.dart';
 import 'package:get/get.dart';
 
@@ -95,21 +94,23 @@ class TAppBar extends GetView<ProfileController> implements PreferredSizeWidget 
         //   onPressed: () => {},
         // ),
         // const SizedBox(width: 8.0),
-        Obx(() {
-          ImageProvider? backgroundImage;
-
-          if (controller.profileImageFile.value != null) {
-            backgroundImage = FileImage(controller.profileImageFile.value!);
-          } else if (controller.profileImageUrl.value.isNotEmpty) {
-            backgroundImage = NetworkImage(controller.profileImageUrl.value);
-          } else {
-            backgroundImage = const AssetImage("assets/images/user_image.jpg");
-          }
-          return CircleAvatar(
-            radius: 20,
-            backgroundImage: backgroundImage,
-          );
-        }),
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Obx(() {
+            ImageProvider? backgroundImage;
+            if (controller.profileImageFile.value != null) {
+              backgroundImage = FileImage(controller.profileImageFile.value!);
+            } else if (controller.profileImageUrl.value.isNotEmpty) {
+              backgroundImage = NetworkImage(controller.profileImageUrl.value);
+            } else {
+              backgroundImage = const AssetImage("assets/images/user_image.jpg");
+            }
+            return CircleAvatar(
+              radius: 18,
+              backgroundImage: backgroundImage,
+            );
+          }),
+        ),
       ],
       backgroundColor: Colors.white,
       elevation: 1,

@@ -77,6 +77,14 @@ Datum _$DatumFromJson(Map<String, dynamic> json) => Datum(
   modulAcara: json['modul_acara'] == null
       ? null
       : ModulAcara.fromJson(json['modul_acara'] as Map<String, dynamic>),
+  presensi: json['presensi'] == null
+      ? null
+      : MyRegistrationPresensi.fromJson(
+          json['presensi'] as Map<String, dynamic>,
+        ),
+  user: json['user'] == null
+      ? null
+      : MyRegistrationUser.fromJson(json['user'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$DatumToJson(Datum instance) => <String, dynamic>{
@@ -90,6 +98,8 @@ Map<String, dynamic> _$DatumToJson(Datum instance) => <String, dynamic>{
   'created_at': instance.createdAt?.toIso8601String(),
   'updated_at': instance.updatedAt?.toIso8601String(),
   'modul_acara': instance.modulAcara,
+  'presensi': instance.presensi,
+  'user': instance.user,
 };
 
 ModulAcara _$ModulAcaraFromJson(Map<String, dynamic> json) => ModulAcara(

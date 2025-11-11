@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'my_registration_event.dart';
+import 'my_registration_presensi.dart';
+import 'my_registration_user.dart';
 
 part 'my_registration.g.dart';
 
@@ -19,7 +21,7 @@ class MyRegistration extends Equatable {
   final String metodeDaftar;
 
   @JsonKey(name: 'waktu_daftar')
-  final String waktuDaftar;
+  final DateTime waktuDaftar;
 
   @JsonKey(name: 'has_doorprize')
   final int hasDoorprize;
@@ -27,8 +29,14 @@ class MyRegistration extends Equatable {
   @JsonKey(name: 'no_sertifikat')
   final String? noSertifikat;
 
+  @JsonKey(name: 'presensi')
+  final MyRegistrationPresensi?  presensi;
+
   @JsonKey(name: 'modul_acara')
   final MyRegistrationEvent modulAcara;
+
+  @JsonKey(name: 'user')
+  final MyRegistrationUser?  user;
 
   const MyRegistration({
     required this.id,
@@ -38,7 +46,9 @@ class MyRegistration extends Equatable {
     required this.waktuDaftar,
     required this.hasDoorprize,
     this.noSertifikat,
+    this.presensi,
     required this.modulAcara,
+    this.user,
   });
 
   factory MyRegistration.fromJson(Map<String, dynamic> json) =>
@@ -47,6 +57,16 @@ class MyRegistration extends Equatable {
   Map<String, dynamic> toJson() => _$MyRegistrationToJson(this);
 
   @override
-  List<Object?> get props =>
-      [id, modulAcaraId, userId, metodeDaftar, waktuDaftar, hasDoorprize, noSertifikat];
+  List<Object?> get props => [
+    id,
+    modulAcaraId,
+    userId,
+    metodeDaftar,
+    waktuDaftar,
+    hasDoorprize,
+    noSertifikat,
+    presensi,
+    modulAcara,
+    user,
+  ];
 }

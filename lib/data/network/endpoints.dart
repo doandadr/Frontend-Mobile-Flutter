@@ -27,9 +27,9 @@ class Endpoints {
   // Event Detail
   static const eventDetail = "/api/events";
 
-
   // Activity User
   static const followedEvents = "/api/me/pendaftaran"; //GET
+  static const followedEventDetail = "/api/events";
   static const cancelRegistration = "/api/events"; // DELETE
   static const presence = "/api/presensi"; // POST
   static const certificate = "/api/me/presensi"; // GET BELUM FIX

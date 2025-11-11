@@ -9,7 +9,6 @@ import '../../models/auth/otp_resend_request.dart';
 import '../../models/auth/otp_verify_request.dart';
 import '../../models/auth/register_request.dart';
 import '../../models/auth/register_response.dart';
-
 import '../../models/auth/reset_password_request.dart';
 import '../../models/auth/forgot_password_request.dart';
 import '../../models/basic_response.dart';
@@ -17,10 +16,10 @@ import '../api_client.dart';
 import '../endpoints.dart';
 
 class AuthService extends GetxService {
-  // Use Get.find() to ensure the same instance is used everywhere.
   final storage = Get.find<GetStorage>();
   final secure = const FlutterSecureStorage();
 
+  /// Login user
   Future<LoginResponse> login(LoginRequest req) async {
     try {
       final response = await ApiClient.dio.post(
@@ -31,11 +30,6 @@ class AuthService extends GetxService {
       final model = LoginResponse.fromJson(response.data);
 
       if (model.success && model.data != null) {
-        // await secure.write(
-        //   key: "access_token",
-        //   value: model.data!.accessToken,
-        // );
-
         storage.write("access_token", model.data!.accessToken);
         storage.write("name", model.data!.user.name);
         storage.write("username", model.data!.user.username);
@@ -54,6 +48,7 @@ class AuthService extends GetxService {
     }
   }
 
+  /// Register new user
   Future<RegisterResponse> register(RegisterRequest req) async {
     try {
       final response = await ApiClient.dio.post(
@@ -73,6 +68,7 @@ class AuthService extends GetxService {
     }
   }
 
+  /// Forgot Password - Send OTP to email
   Future<BasicResponse> forgotPassword(ForgotPasswordRequest req) async {
     try {
       final res = await ApiClient.dio.post(
@@ -86,11 +82,12 @@ class AuthService extends GetxService {
       final data = e.response?.data;
       return BasicResponse(
         success: false,
-        message: data?["message"] ?? "Password reset failed",
+        message: data?["message"] ?? "Gagal mengirim OTP. Silakan coba lagi.",
       );
     }
   }
 
+  /// Reset Password with OTP token
   Future<BasicResponse> resetPassword(ResetPasswordRequest req) async {
     try {
       final res = await ApiClient.dio.post(
@@ -104,30 +101,32 @@ class AuthService extends GetxService {
       final data = e.response?.data;
       return BasicResponse(
         success: false,
-        message: data?["message"] ?? "Invalid reset token",
+        message: data?["message"] ?? "Token tidak valid atau sudah kadaluarsa",
       );
     }
   }
 
+  /// Verify OTP
   Future<int?> verifyOtp(OtpVerifyRequest req) async {
     try {
       final response = await ApiClient.dio.post(
         Endpoints.verifyOtp,
         data: req.toJson(),
       );
+      
       if (response.statusCode == 200) {
         return 200;
       }
+      return null;
+      
     } on DioException catch (e) {
       final res = e.response?.data;
-
-      // return BasicResponse(
-      //   success: false,
-      //   message: res?["message"] ?? "Verification failed",
-      // );
+      print('OTP Verification Error: ${res?["message"] ?? e.message}');
+      return null;
     }
   }
 
+  /// Resend OTP
   Future<BasicResponse> resendOtp(OtpResendRequest req) async {
     try {
       final response = await ApiClient.dio.post(
@@ -141,7 +140,7 @@ class AuthService extends GetxService {
 
       return BasicResponse(
         success: false,
-        message: res?["message"] ?? "Resend failed",
+        message: res?["message"] ?? "Gagal mengirim ulang OTP",
       );
     }
   }

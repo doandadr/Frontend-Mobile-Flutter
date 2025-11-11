@@ -1,25 +1,24 @@
+import 'package:frontend_mobile_flutter/core/logger.dart';
 import 'package:frontend_mobile_flutter/data/network/services/home_service.dart';
 import 'package:get/get.dart';
 
-import '../../../core/utils.dart';
 import '../../../data/models/event/event.dart';
 
-enum HomeFilter { none, active, upcoming, past }
+enum HomeFilter { none, active, upcoming, past, open, closed }
 
 class HomeController extends GetxController {
   final service = Get.find<HomeService>();
 
-  final isLoading = false.obs;
+  final RxBool isLoading = false.obs;
+  final timeNow = DateTime.now();
 
-  // Cached lists in controller (backed by service cache too)
   final allEvents = <Event>[].obs;
-
   final activeEvents = <Event>[].obs;
   final upcomingEvents = <Event>[].obs;
   final pastEvents = <Event>[].obs;
-  // DateTime dateTimeNow = DateTime.now();
+  final openEvents = <Event>[].obs;
+  final closedEvents = <Event>[].obs;
 
-  // current active chip index: null (none) => show all
   final Rxn<HomeFilter> activeFilter = Rxn<HomeFilter>(null);
   final searchQuery = ''.obs;
 
@@ -29,61 +28,67 @@ class HomeController extends GetxController {
     _loadAll();
   }
 
-//   bool canRegister(Event event) {
-//     DateTime? startRegistration = Utils.toDateTimeFlexible(
-//       event.pendaftaranMulai,
-//     );
-//     DateTime? endRegistration = Utils.toDateTimeFlexible(
-//       event.pendaftaranSelesai,
-//     );
-//     DateTime? startEvent = Utils.toDateTimeFlexible(event.acaraMulai);
-//
-//     if (startEvent == null) {
-//       return false;
-//     }
-//
-//     return ["public", "private"].contains(event.kategori) &&
-//         event.status == "active" &&
-//         startEvent.isAfter(dateTimeNow);
-//     /*
-//         && (startRegistration.isAfter(dateTimeNow))
-//         && (endRegistration.isBefore(dateTimeNow));
-// */
-//   }
+  bool _isUpcoming(Event event) {
+    DateTime startRegistration = event.pendaftaranMulai;
+
+    return timeNow.isBefore(startRegistration);
+  }
+
+  bool _isOpen(Event event) {
+    DateTime startRegistration = event.pendaftaranMulai;
+    DateTime endRegistration = event.pendaftaranSelesai;
+
+    return timeNow.isAfter(startRegistration) && timeNow.isBefore(endRegistration);
+  }
+
+  bool _isClosed(Event event) {
+    DateTime endRegistration = event.pendaftaranSelesai;
+    DateTime startEvent = event.acaraMulai;
+
+    return timeNow.isAfter(endRegistration) && timeNow.isBefore(startEvent);
+  }
+
+  bool _isOngoing(Event event) {
+    DateTime startEvent = event.acaraMulai;
+    DateTime? endEvent = event.acaraSelesai;
+
+    if (endEvent == null) return true;
+    return timeNow.isAfter(startEvent) && timeNow.isBefore(endEvent);
+  }
+
+  bool _isPast(Event event) {
+    DateTime? endEvent = event.acaraSelesai;
+
+    if (endEvent == null) return false;
+    return timeNow.isAfter(endEvent);
+  }
 
   Future<void> _loadAll() async {
     try {
       isLoading.value = true;
 
       final a = await service.fetchAllEvents();
-      final b = await service.fetchActiveEvents();
-      final c = await service.fetchUpcomingEvents();
-      final d = await service.fetchPastEvents();
-
       allEvents.assignAll(a);
-      activeEvents.assignAll(b);
-      upcomingEvents.assignAll(c);
-      pastEvents.assignAll(d);
-    } catch (e) {
-      Get.snackbar(
-        "Error loading data",
-        "An unexpected error occurred: ${e.toString()}",
-      );
+      upcomingEvents.assignAll(a.where((event) => _isUpcoming(event)));
+      openEvents.assignAll(a.where((event) => _isOpen(event)));
+      closedEvents.assignAll(a.where((event) => _isClosed(event)));
+      activeEvents.assignAll(a.where((event) => _isOngoing(event)));
+      pastEvents.assignAll(a.where((event) => _isPast(event)));
+    } catch (e, stackTrace) {
+      logger.e("Gagal memuat data home screen", error: e, stackTrace: stackTrace);
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Toggle filter chips. If same filter tapped twice -> deactivate (null -> show all)
   void toggleFilter(HomeFilter filter) {
     if (activeFilter.value == filter) {
-      activeFilter.value = null; // show all
+      activeFilter.value = null;
     } else {
       activeFilter.value = filter;
     }
   }
 
-  /// Returns the current visible list based on activeFilter (null => all)
   List<Event> get visibleEvents {
     List<Event> events;
     final f = activeFilter.value;
@@ -100,8 +105,13 @@ class HomeController extends GetxController {
           events = pastEvents;
           break;
         case HomeFilter.none:
-        default:
-          events = allEvents;
+        events = allEvents;
+          break;
+        case HomeFilter.open:
+          events = openEvents;
+          break;
+        case HomeFilter.closed:
+          events = closedEvents;
           break;
       }
     }
@@ -119,9 +129,7 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> refreshEvents() async {
-    _loadAll();
-  }
+  Future<void> refreshEvents() => _loadAll();
 
   HomeFilter getFilter(Event event) {
     if (activeEvents.contains(event)) {

@@ -69,7 +69,7 @@ class ActivityPage extends GetView<ActivityController> {
                     physics:
                     const AlwaysScrollableScrollPhysics(), // tetap bisa tarik refresh walau item sedikit
                     itemCount: items.length,
-                    separatorBuilder: (_, __) =>
+                    separatorBuilder: (_, _) =>
                     const SizedBox(height: 8),
                     itemBuilder: (_, i) {
                       final d = items[i];
@@ -81,11 +81,16 @@ class ActivityPage extends GetView<ActivityController> {
                       if (status == 'Unknown') {
                         return const SizedBox.shrink();
                       }
+                      
+                      bool isPresent = d.presensi != null && d.presensi?.status == "Hadir";
 
                       return ActivityContainer(
                         eventName: name,
                         eventDate: date,
                         status: status,
+                        isPresent: isPresent,
+                        urlSertifikat: d.modulAcara?.mdlTemplateSertifikatUrl,
+                        hasDoorprize: d.hasDoorprize == 1,
                         onTap: () async {
                           await Get.toNamed(
                             Routes.DETAIL,
@@ -96,23 +101,6 @@ class ActivityPage extends GetView<ActivityController> {
                           );
                           // refresh setelah kembali dari detail
                           await controller.refreshFollowed();
-                        },
-                        onActionTap: () {
-                          if (status == ActivityFilter.selesai) {
-                            Get.snackbar(
-                              'Sertifikat',
-                              'Fitur Unduh sertifikat akan segera hadir.',
-                            );
-                          } else if (status ==
-                              ActivityFilter.berlangsung) {
-                            Get.snackbar(
-                              'Scan QR Code',
-                              'Scan untuk absensi kegiatan.',
-                            );
-                            Get.toNamed(Routes.SCAN);
-                          } else {
-                            print("status else : $status");
-                          }
                         },
                       );
                     },

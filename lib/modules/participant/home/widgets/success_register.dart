@@ -1,28 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SuccessRegister extends StatelessWidget {
   final String title;
   final String subtitle;
+  final String? urlWhatsappGroup;
 
   const SuccessRegister({
     super.key,
     this.title = 'SUCCESS',
     this.subtitle = 'Pendaftaran Berhasil',
+    this.urlWhatsappGroup,
   });
 
-  /// Tampilkan dialog
   static Future<void> show(
-    BuildContext context, {
-    String title = 'SUCCESS',
-    String subtitle = 'Pendaftaran Berhasil',
-  }) {
+      BuildContext context, {
+        String title = 'SUCCESS',
+        String subtitle = 'Pendaftaran Berhasil',
+        String? urlWhatsappGroup,
+      }) {
     return showDialog(
       context: context,
       barrierDismissible: true,
       builder: (_) => Dialog(
         insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
         backgroundColor: Colors.transparent,
-        child: SuccessRegister(title: title, subtitle: subtitle),
+        child: SuccessRegister(
+          title: title,
+          subtitle: subtitle,
+          urlWhatsappGroup: urlWhatsappGroup,
+        ),
       ),
     );
   }
@@ -40,7 +48,6 @@ class SuccessRegister extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Tombol close di pojok kanan atas
             Row(
               children: [
                 const Spacer(),
@@ -56,7 +63,6 @@ class SuccessRegister extends StatelessWidget {
             ),
             const SizedBox(height: 4),
 
-            // Lingkaran hijau + centang
             Container(
               width: 82,
               height: 82,
@@ -64,12 +70,16 @@ class SuccessRegister extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: green,
               ),
-              child: const Icon(Icons.check, size: 44, color: Colors.white),
+              child: Icon(
+                urlWhatsappGroup == null
+                    ? Icons.check
+                    : FontAwesomeIcons.whatsapp,
+                size: 44,
+                color: Colors.white,
+              ),
             ),
 
             const SizedBox(height: 16),
-
-            // SUCCESS
             Text(
               title,
               textAlign: TextAlign.center,
@@ -80,10 +90,8 @@ class SuccessRegister extends StatelessWidget {
                 letterSpacing: .5,
               ),
             ),
-
             const SizedBox(height: 8),
 
-            // Subteks
             Text(
               subtitle,
               textAlign: TextAlign.center,
@@ -93,8 +101,34 @@ class SuccessRegister extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 8),
+            if (urlWhatsappGroup != null)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () async {
+                    final uri = Uri.parse(urlWhatsappGroup!);
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Gabung',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
