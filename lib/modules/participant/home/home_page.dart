@@ -30,40 +30,8 @@ class HomePage extends GetView<HomeController> {
           return Column(
             children: [
               const SizedBox(height: 16),
-              TextField(
-                onChanged: (value) => controller.searchQuery.value = value,
-                decoration: InputDecoration(
-                  hintText: "Cari nama, deskripsi, atau lokasi acara",
-                  prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 20,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1.5,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1.5,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFBDBDBD),
-                      width: 1.5,
-                    ),
-                  ),
-                ),
-              ),
+              // Mengganti TextField dengan widget stateful baru
+              const _HomePageSearchBar(),
               const SizedBox(height: 5),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -134,7 +102,7 @@ class HomePage extends GetView<HomeController> {
                           },
                         )
                       : ListView.separated(
-                          physics: AlwaysScrollableScrollPhysics(),
+                          physics: const AlwaysScrollableScrollPhysics(),
                           itemCount: list.length,
                           separatorBuilder: (_, __) =>
                               const SizedBox(height: 8),
@@ -186,6 +154,83 @@ class HomePage extends GetView<HomeController> {
   }
 }
 
+// Widget stateful baru untuk SearchBar di halaman utama.
+class _HomePageSearchBar extends StatefulWidget {
+  const _HomePageSearchBar();
+
+  @override
+  State<_HomePageSearchBar> createState() => _HomePageSearchBarState();
+}
+
+class _HomePageSearchBarState extends State<_HomePageSearchBar> {
+  final _textController = TextEditingController();
+  final _homeController = Get.find<HomeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _textController,
+      onChanged: (value) => _homeController.searchQuery.value = value,
+      decoration: InputDecoration(
+        hintText: "Cari nama, deskripsi, atau lokasi acara",
+        prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
+        suffixIcon: _textController.text.isEmpty
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  _textController.clear();
+                  _homeController.searchQuery.value = '';
+                  FocusScope.of(context).unfocus();
+                },
+              ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 20,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(
+            color: Color(0xFFE0E0E0),
+            width: 1.5,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(
+            color: Color(0xFFE0E0E0),
+            width: 1.5,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(
+            color: Color(0xFFBDBDBD),
+            width: 1.5,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
 class _EventListTile extends StatelessWidget {
   final Event event;
   final HomeFilter filterCategory;
@@ -195,7 +240,7 @@ class _EventListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final waktu = event.acaraMulai;
-    final tanggal = DateFormat("d MMM yyy", "id_ID").format(waktu);
+    final tanggal = DateFormat("d MMM yyyy", "id_ID").format(waktu);
     final jam = DateFormat("HH:mm", "id_ID").format(waktu);
     final lokasi = event.lokasi;
 
@@ -399,6 +444,5 @@ Widget _buildEventInfo(
             Icon(icon, size: iconSize, color: textColor),
             const SizedBox(width: 4),
             Text(label, style: TextStyle(fontSize: 12, color: textColor,)),
-          ],
-),);
+          ]));
 }

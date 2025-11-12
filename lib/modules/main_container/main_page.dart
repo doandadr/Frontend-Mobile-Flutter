@@ -23,19 +23,19 @@ class MainView extends GetView<MainController> {
 
   List<PersistentBottomNavBarItem> _items() => [
     PersistentBottomNavBarItem(
-      icon: const Icon(Icons.home),
+      icon: const Icon(Icons.home_outlined),
       title: 'Dashboard',
     ),
     PersistentBottomNavBarItem(
-      icon: const Icon(Icons.calendar_today),
-      title: 'Acara',
+      icon: const Icon(Icons.assignment_outlined),
+      title: 'Aktivitas',
     ),
     PersistentBottomNavBarItem(
       icon: const Icon(Icons.qr_code_scanner),
       title: 'Presensi',
     ),
     PersistentBottomNavBarItem(
-      icon: const Icon(Icons.person),
+      icon: const Icon(Icons.person_outline),
       title: 'Profile',
     ),
   ];

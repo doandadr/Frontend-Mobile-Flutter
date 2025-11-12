@@ -1,3 +1,4 @@
+import 'package:frontend_mobile_flutter/data/models/certificate/certificate_response.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:dio/dio.dart';
 
@@ -46,6 +47,30 @@ class ActivityService extends GetxService {
       return ScanResponse(status: false, message: 'Terjadi kesalahan: $e');
     }
   }
+
+  Future<CertificateResponse> getCertificate(int eventId) async {
+    final url = Endpoints.certificate.replaceAll("{eventId}", "$eventId");
+    try {
+      final Response res = await _client.post(url);
+      return CertificateResponse.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final data = e.response?.data;
+
+      return CertificateResponse(
+        status: data?["status"] ?? false,
+        message: data?["message"] ?? "Gagal mengambil sertifikat.",
+        data: null,
+      );
+    } catch (e) {
+      // Untuk jaga-jaga jika error bukan dari Dio
+      return CertificateResponse(
+        status: false,
+        message: "Terjadi kesalahan tak terduga: $e",
+        data: null,
+      );
+    }
+  }
+
 
   String _msg(DioException e, String fallback) {
     final data = e.response?.data;

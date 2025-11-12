@@ -157,8 +157,6 @@ class ProfileController extends GetxController {
 
         Get.back(); // Menutup dialog.
         Get.snackbar('Berhasil', 'Profil berhasil diperbarui.', backgroundColor: Colors.green, colorText: Colors.white);
-      } else {
-        Get.snackbar('Gagal', response.message, backgroundColor: Colors.red, colorText: Colors.white);
       }
     } finally {
       isLoading.value = false;

@@ -17,7 +17,6 @@ class Endpoints {
   static const profileUpdate = "/api/profile/update";
   static const profileChangePassword = "/api/profile/change-password";
 
-
   // Home
   static const eventsAll = "/api/events/all";
   static const events = "/api/events";
@@ -28,10 +27,10 @@ class Endpoints {
   static const eventDetail = "/api/events";
 
   // Activity User
-  static const followedEvents = "/api/me/pendaftaran"; //GET
+  static const followedEvents = "/api/me/pendaftaran-mobile"; //GET
   static const followedEventDetail = "/api/events";
   static const cancelRegistration = "/api/events"; // DELETE
   static const presence = "/api/presensi"; // POST
-  static const certificate = "/api/me/presensi"; // GET BELUM FIX
+  static const certificate = "/api/events/{eventId}/generate-sertif"; //POST
 
 }

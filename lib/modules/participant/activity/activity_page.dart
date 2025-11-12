@@ -31,6 +31,7 @@ class ActivityPage extends GetView<ActivityController> {
 
           final items = controller.filteredFollowed;
 
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -82,14 +83,14 @@ class ActivityPage extends GetView<ActivityController> {
                         return const SizedBox.shrink();
                       }
                       
-                      bool isPresent = d.presensi != null && d.presensi?.status == "Hadir";
+                      bool isPresent = false;//d.presensi != null && d.presensi?.status == "Hadir";
 
                       return ActivityContainer(
                         eventName: name,
                         eventDate: date,
                         status: status,
                         isPresent: isPresent,
-                        urlSertifikat: d.modulAcara?.mdlTemplateSertifikatUrl,
+                        urlSertifikat:d.certificateUrl,
                         hasDoorprize: d.hasDoorprize == 1,
                         onTap: () async {
                           await Get.toNamed(

@@ -67,24 +67,12 @@ Datum _$DatumFromJson(Map<String, dynamic> json) => Datum(
       ? null
       : DateTime.parse(json['waktu_daftar'] as String),
   hasDoorprize: (json['has_doorprize'] as num).toInt(),
+  tipeKehadiran: json['tipe_kehadiran'] as String?,
   noSertifikat: json['no_sertifikat'],
-  createdAt: json['created_at'] == null
-      ? null
-      : DateTime.parse(json['created_at'] as String),
-  updatedAt: json['updated_at'] == null
-      ? null
-      : DateTime.parse(json['updated_at'] as String),
   modulAcara: json['modul_acara'] == null
       ? null
       : ModulAcara.fromJson(json['modul_acara'] as Map<String, dynamic>),
-  presensi: json['presensi'] == null
-      ? null
-      : MyRegistrationPresensi.fromJson(
-          json['presensi'] as Map<String, dynamic>,
-        ),
-  user: json['user'] == null
-      ? null
-      : MyRegistrationUser.fromJson(json['user'] as Map<String, dynamic>),
+  certificateUrl: json['certificateUrl'] as String?,
 );
 
 Map<String, dynamic> _$DatumToJson(Datum instance) => <String, dynamic>{
@@ -94,12 +82,10 @@ Map<String, dynamic> _$DatumToJson(Datum instance) => <String, dynamic>{
   'metode_daftar': instance.metodeDaftar,
   'waktu_daftar': instance.waktuDaftar?.toIso8601String(),
   'has_doorprize': instance.hasDoorprize,
+  'tipe_kehadiran': instance.tipeKehadiran,
   'no_sertifikat': instance.noSertifikat,
-  'created_at': instance.createdAt?.toIso8601String(),
-  'updated_at': instance.updatedAt?.toIso8601String(),
   'modul_acara': instance.modulAcara,
-  'presensi': instance.presensi,
-  'user': instance.user,
+  'certificateUrl': instance.certificateUrl,
 };
 
 ModulAcara _$ModulAcaraFromJson(Map<String, dynamic> json) => ModulAcara(
@@ -110,17 +96,32 @@ ModulAcara _$ModulAcaraFromJson(Map<String, dynamic> json) => ModulAcara(
   mdlKategori: json['mdl_kategori'] as String,
   mdlTipe: json['mdl_tipe'] as String,
   mdlLokasi: json['mdl_lokasi'] as String?,
-  mdlAcaraMulai: json['mdl_acara_mulai'] == null
-      ? null
-      : DateTime.parse(json['mdl_acara_mulai'] as String),
+  mdlAcaraMulai: DateTime.parse(json['mdl_acara_mulai'] as String),
   mdlAcaraSelesai: json['mdl_acara_selesai'] == null
       ? null
       : DateTime.parse(json['mdl_acara_selesai'] as String),
   mdlStatus: json['mdl_status'] as String,
+  mdlBannerAcara: json['mdl_banner_acara'] as String?,
   mdlKodeQr: json['mdl_kode_qr'] as String?,
+  mdlFileAcara: json['mdl_file_acara'] as String?,
+  mdlFileRundown: json['mdl_file_rundown'] as String?,
+  mdlTemplateSertifikat: json['mdl_template_sertifikat'] as String?,
+  mdlLinkWa: json['mdl_link_wa'] as String?,
+  mdlDoorprizeAktif: (json['mdl_doorprize_aktif'] as num).toInt(),
+  mdlSesiAcara: (json['mdl_sesi_acara'] as num?)?.toInt(),
   mdlBannerAcaraUrl: json['mdl_banner_acara_url'] as String?,
   mdlFileAcaraUrl: json['mdl_file_acara_url'] as String?,
   mdlFileRundownUrl: json['mdl_file_rundown_url'] as String?,
+  mdlTemplateSertifikatUrl: json['mdl_template_sertifikat_url'] as String?,
+  presensi: (json['presensi'] as List<dynamic>?)
+      ?.map(
+        (e) => (e as List<dynamic>)
+            .map((e) => Presensi.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      )
+      .toList(),
+  totalHari: (json['total_hari'] as num?)?.toInt(),
+  totalSesi: (json['total_sesi'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$ModulAcaraToJson(ModulAcara instance) =>
@@ -132,14 +133,39 @@ Map<String, dynamic> _$ModulAcaraToJson(ModulAcara instance) =>
       'mdl_kategori': instance.mdlKategori,
       'mdl_tipe': instance.mdlTipe,
       'mdl_lokasi': instance.mdlLokasi,
-      'mdl_acara_mulai': instance.mdlAcaraMulai?.toIso8601String(),
+      'mdl_acara_mulai': instance.mdlAcaraMulai.toIso8601String(),
       'mdl_acara_selesai': instance.mdlAcaraSelesai?.toIso8601String(),
       'mdl_status': instance.mdlStatus,
+      'mdl_banner_acara': instance.mdlBannerAcara,
       'mdl_kode_qr': instance.mdlKodeQr,
+      'mdl_file_acara': instance.mdlFileAcara,
+      'mdl_file_rundown': instance.mdlFileRundown,
+      'mdl_template_sertifikat': instance.mdlTemplateSertifikat,
+      'mdl_link_wa': instance.mdlLinkWa,
+      'mdl_doorprize_aktif': instance.mdlDoorprizeAktif,
+      'mdl_sesi_acara': instance.mdlSesiAcara,
       'mdl_banner_acara_url': instance.mdlBannerAcaraUrl,
       'mdl_file_acara_url': instance.mdlFileAcaraUrl,
       'mdl_file_rundown_url': instance.mdlFileRundownUrl,
+      'mdl_template_sertifikat_url': instance.mdlTemplateSertifikatUrl,
+      'presensi': instance.presensi,
+      'total_hari': instance.totalHari,
+      'total_sesi': instance.totalSesi,
     };
+
+Presensi _$PresensiFromJson(Map<String, dynamic> json) => Presensi(
+  hariKe: (json['hari_ke'] as num).toInt(),
+  sesiAcara: (json['sesi_acara'] as num).toInt(),
+  status: json['status'] as String,
+  tanggalSesi: DateTime.parse(json['tanggal_sesi'] as String),
+);
+
+Map<String, dynamic> _$PresensiToJson(Presensi instance) => <String, dynamic>{
+  'hari_ke': instance.hariKe,
+  'sesi_acara': instance.sesiAcara,
+  'status': instance.status,
+  'tanggal_sesi': instance.tanggalSesi.toIso8601String(),
+};
 
 Link _$LinkFromJson(Map<String, dynamic> json) => Link(
   url: json['url'] as String?,

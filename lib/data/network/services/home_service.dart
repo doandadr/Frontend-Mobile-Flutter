@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 
 import '../../models/event/event.dart';
 import '../api_client.dart';
@@ -19,10 +20,10 @@ class HomeService extends GetxService {
 
       return events;
     } on DioException catch (e) {
-      Get.snackbar("Network Error", e.message ?? "Failed to load events");
+      debugPrint("Network Error: ${e.message ?? "Failed to load events"}");
       return <Event>[];
     } catch (e) {
-      Get.snackbar("Error", "Unexpected error while parsing dashboard data");
+      debugPrint("Error: Unexpected error while parsing dashboard data");
       return <Event>[];
     }
   }
